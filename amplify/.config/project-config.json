@@ -1,0 +1,17 @@
+{
+    "projectName": "EventDating",
+    "version": "2.0",
+    "frontend": "javascript",
+    "javascript": {
+        "framework": "react-native",
+        "config": {
+            "SourceDir": "src",
+            "DistributionDir": "src",
+            "BuildCommand": "npm run-build",
+            "StartCommand": "npm run-start"
+        }
+    },
+    "providers": [
+        "awscloudformation"
+    ]
+}
