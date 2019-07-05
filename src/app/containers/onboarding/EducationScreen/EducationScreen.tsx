@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { Text, View, TouchableOpacity } from "react-native";
 import styles from "./styles";
 
+import { datapost } from './../data'
+
 type ComponentProps = {
 
 }
@@ -23,7 +25,7 @@ class EducationScreen extends Component<ComponentProps, ComponentState> {
                 <View style={{ flexDirection: 'column', position: 'absolute', top: 20, alignItems: 'center' }}>
 
                     <TouchableOpacity
-                        onPress={() => { this.setState({ index: 0 }) }}
+                        onPress={() => { this.setState({ index: 0 });datapost.profile[4].value="HIGH SCHOOL" }}
                         style={[styles.shadowBoxItemBtn, { alignItems: 'center' }]} activeOpacity={0.8}>
                         <Text
                             style={[{
@@ -36,7 +38,7 @@ class EducationScreen extends Component<ComponentProps, ComponentState> {
                             this.state.index == 0 ? { color: 'rgb(158, 149, 254)' } : { color: 'black' }]}>{'HIGH SCHOOL'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => { this.setState({ index: 1 }) }}
+                        onPress={() => { this.setState({ index: 1 });datapost.profile[4].value="UNDERGARD" }}
                         style={[styles.shadowBoxItemBtn, { alignItems: 'center' }]} activeOpacity={0.8}>
                         <Text
                             style={[{
@@ -49,7 +51,7 @@ class EducationScreen extends Component<ComponentProps, ComponentState> {
                             this.state.index == 1 ? { color: 'rgb(158, 149, 254)' } : { color: 'black' }]}>{'UNDERGARD'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => { this.setState({ index: 2 }) }}
+                        onPress={() => { this.setState({ index: 2 });datapost.profile[4].value="POSTGARD" }}
                         style={[styles.shadowBoxItemBtn, { alignItems: 'center' }]} activeOpacity={0.8}>
                         <Text
                             style={[{
@@ -62,7 +64,7 @@ class EducationScreen extends Component<ComponentProps, ComponentState> {
                             this.state.index == 2 ? { color: 'rgb(158, 149, 254)' } : { color: 'black' }]}>{'POSTGARD'}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                        onPress={() => { this.setState({ index: 3 }) }}
+                        onPress={() => { this.setState({ index: 3 });datapost.profile[4].value="PREFER NOT TO SAY" }}
                         style={[styles.shadowBoxItemBtn, { alignItems: 'center' }]} activeOpacity={0.8}>
                         <Text
                             style={[{

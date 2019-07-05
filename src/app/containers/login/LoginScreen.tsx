@@ -1,17 +1,29 @@
 import styles from "./styles";
 import React, { Component } from "react";
-import { Text, View, TextInput, Platform, Dimensions, StatusBar,TouchableOpacity,Image,Alert } from "react-native";
+import axios from "axios";
+import { Text, View, TextInput, Platform, Dimensions, StatusBar,TouchableOpacity,Image,Alert,AsyncStorage } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import { Button } from 'react-native-elements';
 
-import Auth from '@aws-amplify/auth';
+import { data ,datapost} from '../onboarding/data'
+
+// import Auth from '@aws-amplify/auth';
+import amplify,{Auth} from 'aws-amplify';
 
 import awsconfig from '../../../aws-exports';
 Auth.configure(awsconfig);
 
+
+
 const { width, height } = Dimensions.get('window');
 class LoginScreen extends Component<NavigationScreenProps> {
+
+
+    constructor(props: any) {
+        super(props);
+        // this.retrieveData();
+    }
 
     state = {
         progress: 30,
@@ -25,8 +37,37 @@ class LoginScreen extends Component<NavigationScreenProps> {
         username: '',
         password: '',
         loading:false,
-        user: null
+        user: null,
+        login:null,
+        token:""
     };
+
+    Getphone=()=>{
+        axios.get("https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/phone?phoneNumber="+this.state.username, { params:{}, headers: { 'Authorization': this.state.token } }).then(response => {
+            // If request is good...
+            console.log(response.data);
+          })
+          .catch((error) => {
+            console.log('error 3 ' + error);
+          });
+      }
+
+      
+
+    retrieveData = async () => {
+        try {
+          const value = await AsyncStorage.getItem('IsLogin');
+          if (value !== null) {          
+            data.Token  = value;
+            this.props.navigation.navigate('Home');
+          }
+        } catch (error) {
+          // Error retrieving data
+        }
+      };
+
+
+
 
     async signin() {
         const { username, password } = this.state
@@ -36,11 +77,19 @@ class LoginScreen extends Component<NavigationScreenProps> {
 
         await Auth.signIn({ "username": username, "password": password })
             .then(user => {
-                console.log('Signin in: ', user  );
+                console.log('Signin in: ', user  );                
+                console.log(user.signInUserSession.idToken.jwtToken);
+                this.state.token=user.signInUserSession.idToken.jwtToken;
+                data.Token=user.signInUserSession.idToken.jwtToken;
+       
+                // this.Getphone();
+
+
                 this.setState({loading : false});
 
                 this.setState({ user })
-                this.props.navigation.navigate('OBTabScreen')
+                AsyncStorage.setItem('IsLogin',user.signInUserSession.idToken.jwtToken);
+                this.props.navigation.navigate('Home');
 
             })
             .catch(err => {
@@ -78,6 +127,7 @@ class LoginScreen extends Component<NavigationScreenProps> {
                             style={{ width: 35 }}
                             onPress={() => {
                                 this.props.navigation.navigate("Landing")
+                                // Landing Register
                             }}>
                             <Image source={require('../../../assets/arrow_back.png')} style={styles.backButton} />
                         </TouchableOpacity>
@@ -94,7 +144,7 @@ class LoginScreen extends Component<NavigationScreenProps> {
                             placeholderTextColor={'#000'}
                             onChangeText={(text) => { this.state.username = text }}
 
-                        >{}</TextInput>
+                        >{""}</TextInput>
 
                         <Text style={styles.label}>{'Password'}</Text>
                         <TextInput
@@ -103,23 +153,19 @@ class LoginScreen extends Component<NavigationScreenProps> {
                             secureTextEntry={true}
                             placeholderTextColor={'#000'}
                             onChangeText={(text) => { this.state.password = text }}
-
                         ></TextInput>
 
                         <View style={{ flex: 1, alignSelf: "center", marginTop: '7%' }}>
                             <Button
                                 title="Login"
                                  disabled={this.state.loading}
-                                onPress={() => { this.signin() }}
+                                onPress={() => {this.signin() }}
                                 loading={this.state.loading}
                                 type="outline"
-                                // containerStyle={{ marginTop: 30, padding: '5%' }}
+                                // containerStyle={{ marginTop: 30, padding: '5%' }}this.signin()
                                 buttonStyle={{ borderWidth: 1, borderColor: 'black', borderRadius: 5, width: 200 }}
                             />
                         </View>
-
-
-
                     </View>
                 </Content>
                 <Image source={require('../../../assets/bottom_image.png')}

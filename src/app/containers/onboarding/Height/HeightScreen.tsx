@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Text, TextInput, View, TouchableOpacity, Dimensions } from "react-native";
 import styles from "./styles";
+import { datapost} from './../data'
 
 const Picker = require('react-native-wheel-picker');
 const { width } = Dimensions.get('window');
@@ -68,12 +69,12 @@ class HeightScreen extends Component<ComponentProps, ComponentState> {
                         borderTopRightRadius: 5,
                         fontWeight: 'bold',
                         fontSize: 15
-                    }}>YOUR HEIGHT {this.state.feetList[this.state.selectedFeet]}, {this.state.inchList[this.state.selectedInch]} </Text>
+                    }}>  HEIGHT {this.state.feetList[this.state.selectedFeet]}, {this.state.inchList[this.state.selectedInch]} </Text>
                     <View style={{ flexDirection: 'row', backgroundColor: 'rgba(61,39,255,0.2)', width: width - 40, height: width - 40 - 50 }}>
                         <Picker style={{ width: (width - 40) / 2, height: width - 40 - 50 }}
                             selectedValue={this.state.selectedFeet}
                             itemStyle={{ color: "black", fontSize: 25 }}
-                            onValueChange={(index: number) => this.onPickerSelectFeet(index)}>
+                            onValueChange={(index: number) => {this.onPickerSelectFeet(index);datapost.profile[1].value=this.state.selectedFeet + "\'" + this.state.selectedInch+"\"";console.log(datapost.profile[1].value)}}>
                             {this.state.feetList.map((value, i) => (
                                 <PickerItem label={value} value={i} key={"money" + value} />
                             ))}
@@ -81,7 +82,7 @@ class HeightScreen extends Component<ComponentProps, ComponentState> {
                         <Picker style={{ width: (width - 40) / 2, height: width - 40 - 50 }}
                             selectedValue={this.state.selectedInch}
                             itemStyle={{ color: "black", fontSize: 25 }}
-                            onValueChange={(index: number) => this.onPickerSelectInch(index)}>
+                            onValueChange={(index: number) => {this.onPickerSelectInch(index);datapost.profile[1].value=this.state.selectedFeet + "\'" + this.state.selectedInch+"\"";console.log(datapost.profile[1].value)}}>
                             {this.state.inchList.map((value, i) => (
                                 <PickerItem label={value} value={i} key={"money" + value} />
                             ))}
@@ -95,3 +96,6 @@ class HeightScreen extends Component<ComponentProps, ComponentState> {
 }
 
 export default HeightScreen;
+
+// ;datapost.profile[1].value=this.state.selectedFeet + "\'" + this.state.selectedInch+"\"";console.log(datapost.profile[1].value)
+// ;datapost.profile[1].value=this.state.selectedFeet + "\'" + this.state.selectedInch+"\"";

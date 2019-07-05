@@ -1,12 +1,17 @@
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, ImageSourcePropType , Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox } from "react-native";
+import { Dimensions, Image, ImageBackground, ImageSourcePropType, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import styles from "./styles";
 import _ from "lodash";
 
+import { data, datapost } from '../../onboarding/data';
+import axios from "axios";
+
 import Carousel from 'react-native-snap-carousel';
 import { Route, ActivityItem } from '../../../models/models';
+import { forEach } from "../../../../../types/lodash";
+import { object, number, string } from "prop-types";
 const { width } = Dimensions.get('window');
 
 // Images
@@ -42,24 +47,52 @@ type personalInfoItem = {
     image: ImageSourcePropType
 }
 
+// type Respo = {
+//     _id: string, 
+//     entryType: string ,
+//     value: string ,
+//     privacy:string
+// }
+
+type arr = {
+    entryType: string,
+    value: string,
+}
+
 type CompoentState = {
+    name:string,
     index: number,
     routes: Route[],
     popup: boolean,
     tabbarMenu: tabbarMenuItem[],
     personalInfo: personalInfoItem[],
     userDescription: string,
-    listActivities: ActivityItem[]
+    listActivities: ActivityItem[],
+    responsedata: arr[]
 }
+
 
 export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
     static navigationOptions = {
         header: null
     };
 
+
     constructor(props: any) {
         super(props);
-        this.state = {
+        this.state = {  
+            name:"Hanzala",
+            responsedata: [
+                { entryType: "GENDER", value: "" },
+                { entryType: "HEIGHT", value: "4 5" },
+                { entryType: "DRINKING", value: "" },
+                { entryType: "SMOKING", value: "" },
+                { entryType: "EDUCATION_LEVEL", value: "" },
+                { entryType: "SCHOOL", value: "KBCC" },
+                { entryType: "JOB_TITLE", value: "Developer" },
+                { entryType: "NAME", value: "Hanzala" },
+                { entryType: "WORK", value: "Developer" },
+            ],
             index: 0,
             routes: [
                 { title: 'Sample 1', type: 100 },
@@ -70,6 +103,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 { title: 'Sample 6', type: 600 },
                 { title: 'Sample 7', type: 700 },
             ],
+            
             popup: false,
             tabbarMenu:[
                 {
@@ -108,25 +142,25 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     img: question,
                 },
             ],
-            personalInfo:[
+            personalInfo: [
                 {
-                    name:"work",
-                    description:"Information Security @ Tech Mahindra",
+                    name: "work",
+                    description: "Information Security @ Tech Mahindra",
                     image: portfolio
                 },
                 {
-                    name:"study",
-                    description:"The Ontario College of Art and Design University",
+                    name: "study",
+                    description: "The Ontario College of Art and Design University",
                     image: education
                 },
                 {
-                    name:"home",
-                    description:"Pennsylvania",
+                    name: "home",
+                    description: "Pennsylvania",
                     image: houseOutline
                 }
             ],
             userDescription: "AFTER WORK, YOU CAN FIND ME",
-            listActivities:[
+            listActivities: [
                 {
                     title: "I want to go for hiking in the Rocky Mountain1",
                     location: "Circuit of Americas",
@@ -162,7 +196,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     beginHour: "7.30 AM",
                     image: back
                 },
-                 {
+                {
                     title: "I want to go for hiking in the Rocky Mountain6",
                     location: "Circuit of Americas",
                     inPeriod: "Apr.12-Apr.14",
@@ -170,9 +204,45 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     image: back
                 }
             ]
+
+
         };
+
+        this.dataput();
     }
-    renderItem({ item, index }:{ item: any, index: number}) {
+
+
+
+    dataput = () => {
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
+            data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+                // this.setState({ responsedata: response.data.profileEntries });
+
+                // response.data.profileEntries.forEach((arrss: arr) => {
+                //     this.state.responsedata.push({ entryType: arrss.entryType, value: arrss.value })
+                // });
+                // this.state.tabbarMenu[2].label=response.data.profileEntries[1].value;
+                // this.state.tabbarMenu[3].label=response.data.profileEntries[2].value;
+                // this.state.tabbarMenu[4].label=response.data.profileEntries[3].value;
+                // this.state.tabbarMenu[5].label=response.data.profileEntries[4].value;
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
+
+    
+    renderItem({ item, index }: { item: any, index: number }) {
         return (
             <View key={index} style={{ width: '100%', height: (width - 10) / 361 * 297, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                 <View style={styles.posImgContainer}>
@@ -222,7 +292,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{ paddingBottom: 10 }}>
                     {_.map(this.state.tabbarMenu, (item, index) => {
                         return (
-                            <TouchableOpacity key={index} activeOpacity={0.8} style={[styles.shadowBox, { flexDirection: 'row', alignItems: 'center' }]}>
+                            <TouchableOpacity key={index} activeOpacity={0.8} style={[styles.shadowBox, { flexDirection: 'row', alignItems: 'center' }]} onPress={()=>console.log(this.state.tabbarMenu)}>
 
                                 <Image source={item.img}
                                     style={{ height: 20, width: 20, resizeMode: 'contain', margin: 2, tintColor: 'black' }} />

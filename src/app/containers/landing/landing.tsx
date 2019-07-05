@@ -75,6 +75,9 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
                 ToastAndroid.show("Internal server error", ToastAndroid.SHORT);
             });
     };
+
+
+    
     loginWithFacebook = () => {
         LoginManager.logInWithReadPermissions([
             "public_profile",
@@ -117,8 +120,6 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
 
         return (
             <View style={styles.container}>
-
-               
                 <View style={{
                     width: width,
                     ...Platform.select({
@@ -134,13 +135,13 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
                 </View>
                 <Image source={require('../../../assets/logo.png')} style={styles.logoImage} />
                 <Text style={styles.topLogoContiner}>{'Event Dating'}</Text>
-
-                <ProgressBarAnimated
+ 
+                {/* <ProgressBarAnimated
                     {...styles.progressCustomStyles}
                     width={barWidth}
                     value={this.state.progress}
                     backgroundColorOnComplete={colors.periwinkleBlue}
-                />
+                /> */}
 
                 <View style={styles.boottmView}>
 
@@ -175,8 +176,8 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
                         <Text style={styles.phoneStyle}>{'Register Here'}</Text>
                         <View style={styles.layer9} />
                     </TouchableOpacity>
-                    <Text
-                        style={styles.infoText}>{'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,'}</Text>
+                    {/* <Text
+                        style={styles.infoText}>{'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,'}</Text> */}
 
                 </View>
 

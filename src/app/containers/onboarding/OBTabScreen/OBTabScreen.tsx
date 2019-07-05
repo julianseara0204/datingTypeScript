@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { NavigationScreenProps } from "react-navigation";
-import { Image, ScrollView, Text, View, Dimensions, StatusBar, TouchableOpacity, Platform } from "react-native";
+import { Alert,Image, ScrollView, Text, View, Dimensions, StatusBar, TouchableOpacity, Platform } from "react-native";
 import Carousel from 'react-native-snap-carousel';
 import _ from "lodash";
 import styles from './styles';
@@ -14,6 +14,9 @@ import QuestionScreen from '../QuestionScreen';
 import { Container, Content } from "native-base";
 import { Route, TabbarMenuItem } from "../../../models/models";
 const { width, height } = Dimensions.get('window');
+import axios from "axios";
+
+import { data ,datapost} from './../data.js'
 
 // Images
 const my_location = require('../../../../assets/my_location.png');
@@ -99,7 +102,6 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
     }
 
     renderItem({ item, index }: { item: any, index: number }) {
-
         return (
             <View key={index} style={{
                 ...Platform.select({
@@ -136,6 +138,39 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
     }
     enableParentSnap = (flag: any) => {
         this.carouselRef.enableSnap(flag);
+    }
+
+    dataput=()=>{
+
+        console.log(data.Token);
+        console.log(datapost);
+        axios({
+            method: 'PUT',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
+            data: datapost,
+            headers: {
+            'Authorization': data.Token}
+        })
+        .then(function (response) {
+            console.log(response);          
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
+    nextpage=()=>{        
+        this.props.navigation.navigate('Home');
+    }
+
+    next=()=>{
+        let a=this.state.index+1;
+        this.setState({ index: a });
+        this.carouselRef.snapToItem(a, true, true);
+        if(this.state.tabbarMenu.length<a+1){
+            this.dataput();            
+            this.props.navigation.navigate('Home');
+        }
     }
     render() {
         return (
@@ -204,12 +239,12 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                         itemWidth={width}
                         itemHeight={Platform.OS === 'android' ? height - 70 - (StatusBar.currentHeight ? StatusBar.currentHeight : 0) : height - 90}
                     />
-                </Content>
-                <TouchableOpacity
+                </Content> 
+              <TouchableOpacity
                     style={[styles.shadowBoxNextBtn, { alignItems: 'center' }]}
                     activeOpacity={0.8}
                     onPress={() => {
-                        this.props.navigation.navigate('Home');
+                      this.next();
                     }}>
 
                     <Text style={{
@@ -219,10 +254,11 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                         fontWeight: 'bold',
                         fontSize: 20
                     }}>{'NEXT'}</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> 
             </Container>
         );
     }
 }
+
 
 export default OBTabScreen;

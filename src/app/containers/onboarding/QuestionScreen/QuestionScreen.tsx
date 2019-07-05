@@ -3,6 +3,8 @@ import { Text, View, TouchableOpacity, Dimensions, Image } from "react-native";
 import styles from "./styles";
 import Carousel from 'react-native-snap-carousel';
 
+import { data } from './../data'
+
 // Images
 const quote = require('../../../../assets/quote.png');
 const cross = require('../../../../assets/cross.png');
@@ -13,15 +15,27 @@ type ComponentProps = {
 }
 
 type ComponentState = {
-    entry: number[]
+    entry: number[],
 }
 
 class QuestionScreen extends Component<ComponentProps, ComponentState> {
     constructor(props: any) {
         super(props);
         this.state = {
-            entry: [1, 2, 3]
+            entry: [1, 2, 3],
+        
+        
+
+            
         }
+    }
+    submit=()=>{
+        
+        var person = {
+            firstName:"Tom", 
+            lastName:"Hanks", 
+           
+         } 
     }
     renderItem(item: any, props: any) {
         console.log('---------------------------');

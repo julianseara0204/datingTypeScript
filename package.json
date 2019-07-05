@@ -11,15 +11,16 @@
   "dependencies": {
     "@types/lodash": "^4.14.132",
     "@types/react-native-snap-carousel": "^3.7.2",
-    "aws-amplify": "^1.1.26",
+    "aws-amplify": "^1.1.28",
     "aws-amplify-react-native": "^2.1.12",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "date-fns": "^1.30.1",
+    "global": "^4.4.0",
     "lodash": "^4.17.11",
     "native-base": "^2.12.1",
     "node": "^12.1.0",
     "react": "16.8.3",
-    "react-native": "^0.59.6",
+    "react-native": "^0.59.9",
     "react-native-aws-cognito-js": "0.0.7",
     "react-native-confirmation-code-input": "^1.0.4",
     "react-native-dialog": "^5.6.0",
@@ -33,6 +34,7 @@
     "react-native-keyboard-aware-scroll-view": "^0.8.0",
     "react-native-loading-spinner-overlay": "^1.0.1",
     "react-native-localization": "^2.0.1",
+    "react-native-maps": "^0.24.2",
     "react-native-modal-datetime-picker": "^7.4.0",
     "react-native-progress-bar-animated": "^1.0.6",
     "react-native-reanimated": "^1.0.1",
@@ -66,5 +68,7 @@
   },
   "jest": {
     "preset": "react-native"
-  }
+  },
+  "main": "index.js",
+  "license": "MIT"
 }

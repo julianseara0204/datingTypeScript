@@ -21,9 +21,12 @@ import Match from "../containers/Match";
 import ActivityDetail from "../containers/ActivityDetail";
 import InvitedEventDetail from "../containers/InvitedEventDetail";
 import OBTabScreen from "../containers/onboarding/OBTabScreen";
+import { string } from "prop-types";
 
 
-const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
+
+// const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
+const LoginStack = createStackNavigator({ Landing, OtpScreen });
 
 
 //const AuthTabs = createBottomTabNavigator({LoginStack, RegisterScreen});

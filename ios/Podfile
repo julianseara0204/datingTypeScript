@@ -16,6 +16,8 @@ target 'EventDating' do
     # Pods for testing
     pod 'RNAWSCognito', :path => '../node_modules/amazon-cognito-identity-js'
 
+    pod 'react-native-maps', :path => '../node_modules/react-native-maps'
+
   end
 
   target 'EventDatingTests' do

@@ -1,0 +1,25 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "eventdating-dev-20190510092449-authRole",
+            "UnauthRoleArn": "arn:aws:iam::242547982701:role/eventdating-dev-20190510092449-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::242547982701:role/eventdating-dev-20190510092449-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "eventdating-dev-20190510092449-deployment",
+            "UnauthRoleName": "eventdating-dev-20190510092449-unauthRole",
+            "StackName": "eventdating-dev-20190510092449",
+            "StackId": "arn:aws:cloudformation:us-east-1:242547982701:stack/eventdating-dev-20190510092449/230d82e0-7340-11e9-89cb-121b5b00f9e8"
+        },
+        "categories": {
+            "auth": {
+                "cognito28587994": {}
+            }
+        }
+    },
+    "auth": {
+        "cognito28587994": {
+            "service": "Cognito",
+            "providerPlugin": "awscloudformation"
+        }
+    }
+}

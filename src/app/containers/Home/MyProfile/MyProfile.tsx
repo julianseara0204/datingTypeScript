@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox } from "react-native";
+import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, AsyncStorage } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import styles from "./styles";
@@ -21,6 +21,7 @@ const photo = require('../../../../assets/photo.png');
 const back = require('../../../../assets/back.png');
 const like = require('../../../../assets/like.png');
 const send = require('../../../../assets/send.png');
+const logout = require('../../../../assets/keyhole.png');
 
 type ComponentState = {
     userEmail: string,
@@ -42,12 +43,23 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState> 
         };
     }
 
+    logout=()=>{
+        AsyncStorage.clear();this.props.navigation.navigate('LoginScreen');
+    }
+
     render() {
         return (
             <Content>
                 <View style={{ flexDirection: 'row', width: width, padding: 20, justifyContent: 'space-between' }}>
                     <Text style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}>MY PROFILE</Text>
                     <View style={{ flexDirection: 'row' }}>
+                        
+                    <TouchableOpacity activeOpacity={0.8}
+                            onPress={() => { AsyncStorage.clear();this.props.navigation.navigate('LoginScreen'); }}>
+                            <Image source={logout} style={{ width: 30, height: 30, resizeMode: 'contain', marginRight: 10 }} />
+                        </TouchableOpacity>
+
+
                         <TouchableOpacity activeOpacity={0.8}
                             onPress={() => { this.props.navigation.navigate('AccountSetting'); }}>
                             <Image source={gear} style={{ width: 30, height: 30, resizeMode: 'contain', marginRight: 10 }} />
