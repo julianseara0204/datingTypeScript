@@ -4,36 +4,37 @@ import { NavigationScreenProps } from "react-navigation";
 import { Container, Content, Icon } from "native-base"
 import styles from "./styles";
 import _ from "lodash";
-import clock from '../../../assets/clock.png';
-import arrow from '../../../assets/arrow_back.png';
-import birthCake from '../../../assets/birthdayCakePiece.png';
-import menu from '../../../assets/menu.png';
-import my_location from '../../../assets/my_location.png';
-import scale_icon from '../../../assets/scale.png';
-import gender from '../../../assets/gender.png';
-import height_png from '../../../assets/height.png';
-import cheers from '../../../assets/cheers.png';
-import smoke from '../../../assets/smoke.png';
-import education from '../../../assets/education.png';
-import portfolio from '../../../assets/portfolio.png';
-import question from '../../../assets/question.png';
-import houseOutline from '../../../assets/houseOutline.png';
-import quote from '../../../assets/quote.png';
-import place from '../../../assets/place.png';
-import appointment from '../../../assets/appointment.png';
-import ProgressBarAnimated from 'react-native-progress-bar-animated';
-import pos from '../../../assets/pos.png';
-import photo from '../../../assets/photo.png';
-import back from '../../../assets/back.png';
-import remove_icon from '../../../assets/remove.png';
-import heart_icon from '../../../assets/heart.png';
-import like from '../../../assets/like.png';
-import send from '../../../assets/send.png';
-import filter from '../../../assets/filter.png';
+const clock = require('../../../assets/clock.png');
+const birthCake = require('../../../assets/birthdayCakePiece.png');
+const scale_icon = require('../../../assets/scale.png');
+const height_png = require('../../../assets/height.png');
+const cheers = require('../../../assets/cheers.png');
+const smoke = require('../../../assets/smoke.png');
+const education = require('../../../assets/education.png');
+const portfolio = require('../../../assets/portfolio.png');
+const question = require('../../../assets/question.png');
+const houseOutline = require('../../../assets/houseOutline.png');
+const quote = require('../../../assets/quote.png');
+const place = require('../../../assets/place.png');
+const appointment = require('../../../assets/appointment.png');
+const photo = require('../../../assets/photo.png');
+const back = require('../../../assets/back.png');
+const remove_icon = require('../../../assets/remove.png');
+const heart_icon = require('../../../assets/heart.png');
+const like = require('../../../assets/like.png');
+const send = require('../../../assets/send.png');
+const pos = require('../../../assets/pos.png');
+const arrow = require('../../../assets/arrow.png');
+
+
+import { Route, ActivityItem } from '../../models/models';
+
+
+// import ProgressBarAnimated from 'react-native-progress-bar-animated';
 import colors from '../../../Colors';
 import Carousel from 'react-native-snap-carousel';
 import HomeFooter from './HomeFooter';
-import PopupSendLike from './PopupSendLike';
+// import PopupSendLike from './PopupSendLike';
 import { GiftedChat, Send, Composer, Actions, Bubble, Message, Avatar } from "react-native-gifted-chat";
 const { width, height } = Dimensions.get('window');
 const TabbarMenu = [
@@ -79,11 +80,15 @@ const TabbarMenu = [
         img: question,
     },
 ];
+
+
+
 export class InvitedProfile extends Component<NavigationScreenProps> {
     static navigationOptions = {
         header: null
     };
 
+    
     constructor(props: any) {
         super(props);
         this.state = {
@@ -101,7 +106,7 @@ export class InvitedProfile extends Component<NavigationScreenProps> {
         };
     }
 
-    _renderItem({ item, index }) {
+    _renderItem({ item, index }: { item: any, index: number }) {
         return (
             <View style={{ width: '100%', height: (width - 10) / 361 * 297, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                 <View style={styles.posImgContainer}>
@@ -175,14 +180,14 @@ export class InvitedProfile extends Component<NavigationScreenProps> {
                             <Image source={pos} style={styles.posImg} />
                         </View>
                     </View>
-                    <Carousel
+                    {/* <Carousel
                         data={this.state.routes}
                         renderItem={this._renderItem}
                         sliderWidth={width}
                         sliderHeight={(width - 10) / 361 * 297 + 20}
                         itemWidth={width - 10}
                         itemHeight={(width - 10) / 361 * 297 + 20}
-                    />
+                    /> */}
                     <Text style={{
                         marginTop: 10, marginLeft: 10, color: 'black',
                         fontWeight: 'bold',

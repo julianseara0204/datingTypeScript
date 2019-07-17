@@ -1,11 +1,21 @@
-import React, { Component } from "react";
-import { Dimensions, Image, Text, TouchableOpacity, View, StatusBar, Platform } from "react-native";
-import { NavigationScreenProps } from "react-navigation";
-import { Container, Content, Input } from "native-base";
+// import React, { Component } from "react";
+// import { Dimensions, Image, Text, TouchableOpacity, View, StatusBar, Platform } from "react-native";
+// import { NavigationScreenProps } from "react-navigation";
+// import { Container, Content, Input } from "native-base";
 import {USERS_COGNITO, fetchLink} from "../../utils/endpoints"
-import styles from "./styles";
+// import styles from "./styles";
 import strings from "./strings";
+// import _ from "lodash";
+
+import React, { Component } from "react";
+import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Platform } from "react-native";
+import { NavigationScreenProps } from "react-navigation";
+import { Container, Content, Icon ,Input} from "native-base"
+import styles from "./styles";
 import _ from "lodash";
+
+
+// import {ToggleSwitch} from 'toggle-switch-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -17,7 +27,6 @@ const nounCookiesPolicies = require( '../../../assets/nounCookiesPolicies.png');
 const danger = require( '../../../assets/danger.png');
 const licenses = require( '../../../assets/licenses.png');
 const arrow = require( '../../../assets/arrow.png');
-const ToggleSwitch = require('toggle-switch-react-native');
 
 type CompenentState = {
     pushNotification: boolean,
@@ -146,7 +155,7 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 placeholderTextColor={'#000'}
                                 style={styles.text} />
                         </View> */}
-                        <Text style={styles.label}>{'NOTIFICATION'}</Text>
+                        {/* <Text style={styles.label}>{'NOTIFICATION'}</Text>
                         <View style={styles.itemContainer}>
                             <Input
                                 placeholder={'PUSH NOTIFICATION'}
@@ -161,7 +170,7 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 size='small'
                                 onToggle={this.handleOnToggle("pushNotification")}
                             />
-                        </View>
+                        </View> */}
                         <Text style={styles.label}>{'MEMBERSHIP'}</Text>
                         <View style={styles.itemContainer}>
                             <Input
@@ -176,22 +185,22 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 placeholder={'Facebook'}
                                 placeholderTextColor={'#000'}
                                 style={styles.text} />
-                            <ToggleSwitch
-                                isOn={this.state.facebook}
+                            {/* <ToggleSwitch
+                                // isOn={this.state.facebook}
                                 onColor='rgb(95, 199, 108)'
                                 offColor='rgba(228, 228, 228, 0.7)'
                                 // label='Example label'
                                 // labelStyle={{ color: 'black', fontWeight: '900' }}
                                 size='small'
-                                onToggle={this.handleOnToggle("facebook")}
-                            />
+                                // onToggle={this.handleOnToggle("facebook")}
+                            /> */}
                         </View>
                         <View style={styles.itemContainer}>
                             <Input
                                 placeholder={'Instagram'}
                                 placeholderTextColor={'#000'}
-                                style={styles.text} />
-                            <ToggleSwitch
+                                style={styles.text}></Input>
+                            {/* <ToggleSwitch
                                 isOn={this.state.instagram}
                                 onColor='rgb(95, 199, 108)'
                                 offColor='rgba(228, 228, 228, 0.7)'
@@ -199,7 +208,7 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 // labelStyle={{ color: 'black', fontWeight: '900' }}
                                 size='small'
                                 onToggle={this.handleOnToggle("instagram")}
-                            />
+                            /> */}
                         </View>
                         {/* TODO: Links to sections */}
                         <Text style={styles.label}>{strings.legal}</Text>

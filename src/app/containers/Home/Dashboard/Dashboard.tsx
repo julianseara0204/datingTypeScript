@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, ImageSourcePropType, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox } from "react-native";
+import { Dimensions, Image, ImageBackground, ImageSourcePropType, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Alert } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import styles from "./styles";
@@ -8,6 +8,7 @@ import _ from "lodash";
 import { data, datapost } from '../../onboarding/data';
 import axios from "axios";
 
+import { format } from 'date-fns';
 import Carousel from 'react-native-snap-carousel';
 import { Route, ActivityItem } from '../../../models/models';
 import { forEach } from "../../../../../types/lodash";
@@ -55,12 +56,49 @@ type personalInfoItem = {
 // }
 
 type arr = {
+    _id: string,
     entryType: string,
     value: string,
+    privacy: string
 }
 
+type event = {
+    createdAt: string,
+    eventDescription: string,
+    eventName: string,
+    updatedAt: string,
+    _eventEndTime: string,
+    _eventStartTime: string,
+    _id: string,
+}
+
+type interset = {
+    WORK: string,
+    JOB_TITLE: string,
+    SCHOOL: string,
+    EDUCATION_LEVEL: string,
+    RELIGIOUS_BELIEFS: string,
+    POLITICS: string,
+    NAME: string,
+    GENDER: string,
+    AGE: string,
+    HEIGHT: string,
+    KIDS: string,
+    FAMILY_PLANS: string,
+    DRINKING: string,
+    SMOKING: string,
+    MARIKUANA: string,
+    DRUGS: string
+
+}
+
+
+
+
+
 type CompoentState = {
-    name:string,
+    name: string,
+    picture: string,
     index: number,
     routes: Route[],
     popup: boolean,
@@ -68,7 +106,10 @@ type CompoentState = {
     personalInfo: personalInfoItem[],
     userDescription: string,
     listActivities: ActivityItem[],
-    responsedata: arr[]
+    responsedata: arr[],
+    itemarr: ActivityItem[],
+
+    intersetvalue: interset
 }
 
 
@@ -80,67 +121,40 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
     constructor(props: any) {
         super(props);
-        this.state = {  
-            name:"Hanzala",
+        this.state = {
+            name: "Hanzala",
+            picture: photo,
+            itemarr: [],
             responsedata: [
-                { entryType: "GENDER", value: "" },
-                { entryType: "HEIGHT", value: "4 5" },
-                { entryType: "DRINKING", value: "" },
-                { entryType: "SMOKING", value: "" },
-                { entryType: "EDUCATION_LEVEL", value: "" },
-                { entryType: "SCHOOL", value: "KBCC" },
-                { entryType: "JOB_TITLE", value: "Developer" },
-                { entryType: "NAME", value: "Hanzala" },
-                { entryType: "WORK", value: "Developer" },
+                { _id: "", entryType: "GENDER", value: "", privacy: "" },
             ],
             index: 0,
             routes: [
-                { title: 'Sample 1', type: 100 },
-                { title: 'Sample 2', type: 200 },
-                { title: 'Sample 3', type: 300 },
-                { title: 'Sample 4', type: 400 },
-                { title: 'Sample 5', type: 500 },
-                { title: 'Sample 6', type: 600 },
-                { title: 'Sample 7', type: 700 },
             ],
-            
+
+
+            intersetvalue: {
+                WORK: "",
+                JOB_TITLE: "",
+                SCHOOL: "",
+                EDUCATION_LEVEL: "",
+                RELIGIOUS_BELIEFS: "",
+                POLITICS: "",
+                NAME: "",
+                GENDER: "",
+                AGE: "",
+                HEIGHT: "",
+                KIDS: "",
+                FAMILY_PLANS: "",
+                DRINKING: "",
+                SMOKING: "asd",
+                MARIKUANA: "",
+                DRUGS: "",
+            },
+
+
             popup: false,
-            tabbarMenu:[
-                {
-                    id: 100,
-                    label: "32",
-                    img: birthCake,
-                },
-                {
-                    id: 200,
-                    label: "64",
-                    img: scale_icon,
-                },
-                {
-                    id: 300,
-                    label: "5\'3\"",
-                    img: height_png,
-                },
-                {
-                    id: 400,
-                    label: "Drinks",
-                    img: cheers,
-                },
-                {
-                    id: 500,
-                    label: "Smoke",
-                    img: smoke,
-                },
-                {
-                    id: 600,
-                    label: "Education",
-                    img: education,
-                },
-                {
-                    id: 700,
-                    label: "Question",
-                    img: question,
-                },
+            tabbarMenu: [
             ],
             personalInfo: [
                 {
@@ -161,63 +175,54 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             ],
             userDescription: "AFTER WORK, YOU CAN FIND ME",
             listActivities: [
-                {
-                    title: "I want to go for hiking in the Rocky Mountain1",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                },
-                {
-                    title: "I want to go for hiking in the Rocky Mountain2",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                },
-                {
-                    title: "I want to go for hiking in the Rocky Mountain3",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                },
-                {
-                    title: "I want to go for hiking in the Rocky Mountain4",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                },
-                {
-                    title: "I want to go for hiking in the Rocky Mountain5",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                },
-                {
-                    title: "I want to go for hiking in the Rocky Mountain6",
-                    location: "Circuit of Americas",
-                    inPeriod: "Apr.12-Apr.14",
-                    beginHour: "7.30 AM",
-                    image: back
-                }
             ]
-
-
         };
 
         this.dataput();
     }
 
+    getuserimage = (id: string, type: string) => {
+
+
+        const routedup = this.state.routes;
+
+        axios({
+            method: 'GET',
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+                console.log(response);
+                if (response.data.length > 0) {
+                    routedup.push({ id: id, Picture: response.data[0].fileUrl })
+                    this.setState({ picture: response.data[0].fileUrl })
+                    console.log(response.data[0].fileUrl)
+                }
+                else {
+                    if (type == "USER_ACCOUNT") {
+                        routedup.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
+                    }
+                    else if (type == "EVENTS") {
+                        routedup.push({ id: id, Picture: '../../../../assets/back.png' })
+                    }
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+        console.log(routedup);
+        this.setState({ routes: routedup });
+    }
 
 
     dataput = () => {
         axios({
             method: 'GET',
-            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
-            data: datapost,
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/filter?gender=MAN',
             headers: {
                 'Authorization': data.Token
             }
@@ -225,13 +230,146 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             .then((response) => {
                 // this.setState({ responsedata: response.data.profileEntries });
 
-                // response.data.profileEntries.forEach((arrss: arr) => {
-                //     this.state.responsedata.push({ entryType: arrss.entryType, value: arrss.value })
-                // });
-                // this.state.tabbarMenu[2].label=response.data.profileEntries[1].value;
-                // this.state.tabbarMenu[3].label=response.data.profileEntries[2].value;
-                // this.state.tabbarMenu[4].label=response.data.profileEntries[3].value;
-                // this.state.tabbarMenu[5].label=response.data.profileEntries[4].value;
+                this.setState({ responsedata: response.data.profileEntries })
+
+                var no: number = 200;
+                const tabbarMenuDup = [];
+                // const routedup = []
+
+
+
+                tabbarMenuDup.push({
+                    id: 100,
+                    label: "32",
+                    img: birthCake,
+                },
+                    {
+                        id: 200,
+                        label: "64",
+                        img: scale_icon,
+                    })
+
+                for (var index in response.data) {
+
+                    this.setState({ picture: photo })
+                    this.getuserimage(response.data[index].userAccount, "USER_ACCOUNT");
+
+
+                    // routedup.push({ id: response.data[index]._id, Picture: this.state.picture });
+
+
+                    if (!index) {
+                        response.data[index].profileEntries.forEach((item: arr) => {
+
+                            switch (item.entryType) {
+                                case "GENDER":
+                                    no = no + 100;
+                                    console.log(item.value);
+                                    break;
+
+                                case "HEIGHT":
+                                    no = no + 100;
+                                    tabbarMenuDup.push({
+                                        id: no,
+                                        label: item.value,
+                                        img: height_png,
+                                    });
+                                    console.log(no + 100);
+                                    break;
+
+                                case "DRINKING":
+                                    no = no + 100;
+                                    tabbarMenuDup.push({
+                                        id: no,
+                                        label: item.value,
+                                        img: cheers,
+                                    });
+                                    console.log(no + 100);
+                                    break;
+                                case "SMOKING":
+                                    no = no + 100;
+                                    tabbarMenuDup.push({
+                                        id: no,
+                                        label: item.value,
+                                        img: smoke,
+                                    });
+                                    console.log(no + 100);
+                                    break;
+
+                                case "EDUCATION_LEVEL":
+                                    no = no + 100;
+                                    tabbarMenuDup.push({
+                                        id: no,
+                                        label: item.value,
+                                        img: education,
+                                    });
+                                    console.log(no + 100);
+                                    break;
+
+                                case "JOB_TITLE":
+                                    console.log(item.value);
+                                    break;
+
+
+                                case "NAME":
+                                    this.setState({ name: item.value });
+                                    console.log(item.value);
+                                    break;
+
+                                case "WORK":
+                                    console.log(item.value);
+                                    break;
+                            }
+                        })
+                    }
+                }
+
+                // this.setState({ routes: routedup });
+
+                this.setState({ tabbarMenu: tabbarMenuDup });
+                console.log(this.state.responsedata);
+                console.log(response);
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+        // event
+
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/events',
+            // data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+
+
+                response.data.forEach((arrss: event) => {
+
+                    this.setState({ picture: back })
+                    // this.getuserimage(arrss._id,"EVENT");
+                    const eachevent = {
+                        id: arrss._id,
+                        title: arrss.eventName,
+                        location: "Circuit of Americas",
+                        inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
+                        beginHour: "7.30 AM",
+                        image: this.state.picture,
+                    }
+
+                    // this.state.itemarr.push(eachevent);     
+                    this.state.listActivities.push(eachevent);
+                });
+
+                const ar = this.state.listActivities;
+                this.setState({ listActivities: ar });
+
+                console.log(this.state.listActivities);
                 console.log(response);
             })
             .catch((error) => {
@@ -241,20 +379,70 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
     }
 
 
-    
+
+    like = (id: string, type: string) => {
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
+            data: {
+                "interaction": "LIKED",
+                "type": "EVENT",
+                "entity": id
+            },
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    useriddd = (id: string) => {
+        Alert.alert(id)
+    }
+
+
     renderItem({ item, index }: { item: any, index: number }) {
         return (
             <View key={index} style={{ width: '100%', height: (width - 10) / 361 * 297, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                 <View style={styles.posImgContainer}>
-                    <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={photo} />
+                    <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{uri: item.Picture}} />
                 </View>
                 <TouchableOpacity activeOpacity={0.8}
                     style={[{ marginTop: -20 }, styles.iconContainer]}>
                     <Image source={remove_icon} style={styles.iconImg} />
                 </TouchableOpacity>
                 <TouchableOpacity activeOpacity={0.8}
+                    onPress={() => {
+                        console.log(item.id);
+                        axios({
+                            method: 'POST',
+                            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
+                            data: {
+                                "interaction": "LIKED",
+                                "type": "USER_ACCOUNT",
+                                "entity": item.id
+                            },
+                            headers: {
+                                'Authorization': data.Token
+                            }
+                        })
+                            .then((response) => {
+
+                                console.log(response);
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+                    }}
                     style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
                     <Image source={heart_icon} style={styles.iconImg} />
+                    {/* <Text style={[styles.smallText, { width: width - 50 }]}>{item.type}</Text> */}
                 </TouchableOpacity>
             </View>);
     }
@@ -267,7 +455,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                         color: '#000',
                         fontWeight: 'bold',
                         fontSize: 25
-                    }}>ALISA CRAIG</Text>
+                    }}>{this.state.name}</Text>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={{
                             color: '#000',
@@ -292,7 +480,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 <ScrollView horizontal={true} showsHorizontalScrollIndicator={false} style={{ paddingBottom: 10 }}>
                     {_.map(this.state.tabbarMenu, (item, index) => {
                         return (
-                            <TouchableOpacity key={index} activeOpacity={0.8} style={[styles.shadowBox, { flexDirection: 'row', alignItems: 'center' }]} onPress={()=>console.log(this.state.tabbarMenu)}>
+                            <TouchableOpacity key={index} activeOpacity={0.8} style={[styles.shadowBox, { flexDirection: 'row', alignItems: 'center' }]} onPress={() => console.log(this.state.tabbarMenu)}>
 
                                 <Image source={item.img}
                                     style={{ height: 20, width: 20, resizeMode: 'contain', margin: 2, tintColor: 'black' }} />
@@ -312,7 +500,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     })}
                 </ScrollView>
                 {this.state.personalInfo.map((item, index) =>
-                    <View key={index} style={styles.descRow}>
+                    <View key={index} style={styles.descRow} >
                         <Image source={item.image} style={styles.smallIcon} />
                         <Text style={[styles.smallText, { width: width - 50 }]}>{item.description}</Text>
                     </View>
@@ -323,194 +511,80 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     fontSize: 15
                 }}>{this.state.userDescription}</Text>
 
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'column', padding: 10, width: width }}>
-                        <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
-                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                            <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
-                            <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
-                                <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey', marginRight: 5 }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
 
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
+                {/* ACTIVITY */}
 
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+
+                {this.state.listActivities.map((item, index) =>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
+
+                        <View style={{ flexDirection: 'column', padding: 10, width: width }}>
+                            <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
+                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                                <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
+                                <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
+                                    <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
+                                </TouchableOpacity>
                             </View>
                         </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}
-                            onPress={() => {
-                                this.setState({ popup: true });
-                            }}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
 
-                </View>
-
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'column', padding: 10, width: width }}>
-                        <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
-                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                            <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
-                            <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
-                                <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
+                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
+                            <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>{item.title}</Text>
+                            <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
                         </View>
 
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={place} style={[styles.smallIcon, { tintColor: 'grey', marginRight: 5 }]} />
+                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.location}</Text>
+                            </View>
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
 
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
+                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.inPeriod}</Text>
                             </View>
                         </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}
-                            onPress={() => {
-                                this.setState({ popup: true });
-                            }}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
 
-                </View>
-
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'column', padding: 10, width: width }}>
-                        <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
-                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                            <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
-                            <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
-                                <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
+                        <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
+                            <View style={styles.posImgContainer}>
+                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    position: 'absolute',
+                                    top: 0, right: 0,
+                                    padding: 5,
+                                    backgroundColor: 'rgb(158, 149, 254)',
+                                    borderTopRightRadius: 5,
+                                    borderBottomLeftRadius: 5
+                                }}>
+                                    <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
+                                    <Text
+                                        style={[styles.smallText, { color: 'white' }]}>{item.beginHour}</Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity activeOpacity={0.8}
+                                style={[{ marginTop: -20 }, styles.iconContainer]}
+                                onPress={() => {
+                                    this.setState({ popup: true });
+                                    console.log(item.id);
+                                    this.like(item.id, "ACTIVITY");
+                                }}>
+                                <Image source={like} style={styles.iconImg} />
+                            </TouchableOpacity>
+                            <TouchableOpacity activeOpacity={0.8}
+                                style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
+                                <Image source={send} style={styles.iconImg} />
                             </TouchableOpacity>
                         </View>
+
                     </View>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                        <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
+                )}
+                {/* ACTIVITY END*/}
 
 
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}
-                            onPress={() => {
-                                this.setState({ popup: true });
-                            }}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-
-                </View>
                 <View style={{ height: 60, backgroundColor: 'white' }} />
             </Content>
 

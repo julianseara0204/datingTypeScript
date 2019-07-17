@@ -10,6 +10,8 @@ const { width, height } = Dimensions.get('window');
 const { LoginButton, LoginManager, AccessToken } = FBSDK;
 const BACKEND_URL = 'http://ec2-3-90-122-176.compute-1.amazonaws.com:8004';
 
+import { data, datapost } from '../onboarding/data';
+
 import Auth from '@aws-amplify/auth';
 
 import awsconfig from '../../../aws-exports';
@@ -113,6 +115,8 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
         );
     }
 
+   
+
     render() {
 
         const barWidth = Dimensions.get('screen').width - 150;
@@ -155,6 +159,8 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
                         <View style={styles.layer9} />
                     </TouchableOpacity> 
 
+
+ 
 
 
                     <TouchableOpacity

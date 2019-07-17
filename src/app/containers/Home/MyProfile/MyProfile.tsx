@@ -4,6 +4,10 @@ import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import styles from "./styles";
 import _ from "lodash";
+import { data, datapost } from '../../onboarding/data';
+import axios from "axios";
+
+import { format } from 'date-fns';
 
 const { width } = Dimensions.get('window');
 
@@ -26,10 +30,37 @@ const logout = require('../../../../assets/keyhole.png');
 type ComponentState = {
     userEmail: string,
     userName: string,
-    userPrivilege: string
+    userPrivilege: string,
+    activitymap: arr[],    
+    filereqdata:filereq
 }
 
-export class MyProfile extends Component<NavigationScreenProps, ComponentState> {
+type arr = {
+    createdAt: string,
+    eventDescription: string,
+    eventName: string,
+    updatedAt: string,
+    _eventEndTime: string,
+    _eventStartTime: string,
+    _id: string,
+}
+type filereq = {
+
+    "entityType": string,
+    "name": string,
+    "entity": string,
+    "type": string,
+
+}
+
+type arritem = {
+    _id: string,
+    entryType: string,
+    value: string,
+    privacy: string
+}
+
+export class MyProfile extends Component<NavigationScreenProps, ComponentState, arr> {
     static navigationOptions = {
         header: null
     };
@@ -37,25 +68,131 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState> 
     constructor(props: any) {
         super(props);
         this.state = {
+            activitymap: [],
             userEmail: "example@mail.com",
             userName: "ALISA CRAIG",
-            userPrivilege: "Privilege Membership"
+            userPrivilege: "Privilege Membership",
+            filereqdata:	{
+                "entityType": "ACTIVITY",
+                "name": "logo.png",
+                "entity": "123321",
+                "type": "image/png/Jpeg"
+              },
+
         };
+
+        this.dataput();
     }
 
-    logout=()=>{
-        AsyncStorage.clear();this.props.navigation.navigate('LoginScreen');
+
+
+
+    dataput = () => {
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
+            // data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+
+                response.data.profileEntries.forEach((arrss: arritem) => {
+                    if(arrss.entryType==="NAME")
+                    {
+                        this.setState({ userName: arrss.value });
+                        console.log(this.state.userName);
+                    }
+                });
+                // const name =response.data.profileEntries.filter((book:arritem) => (book.entryType === "NAME"? book.value :""));
+                
+                this.setState({ userEmail: response.data.userAccount.email });
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+        
+        // event
+
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/events',
+            // data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+
+                response.data.forEach((arrss: arr) => {
+                    console.log(arrss);
+                    // this.state.activitymap.push(arrss);
+                });
+
+                this.setState({ activitymap: response.data });
+                console.log(this.state.activitymap);
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
+
+    putbtn = () => {
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
+            data: this.state.filereqdata,
+            headers: {
+                'Authorization': data.Token,
+            }
+        })
+            .then((response) => {
+
+                axios({
+                    method: 'PUT',
+                    url: response.data.fileUploadUrl,
+                    data: photo,
+                    headers: {
+                        'Content-Type': 'application/octet-stream'
+                    }
+                })
+                    .then((response) => {
+                        console.log(response);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+
+
+    }
+
+    logout = () => {
+        AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen');
     }
 
     render() {
         return (
             <Content>
+                
                 <View style={{ flexDirection: 'row', width: width, padding: 20, justifyContent: 'space-between' }}>
                     <Text style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}>MY PROFILE</Text>
                     <View style={{ flexDirection: 'row' }}>
-                        
-                    <TouchableOpacity activeOpacity={0.8}
-                            onPress={() => { AsyncStorage.clear();this.props.navigation.navigate('LoginScreen'); }}>
+
+                        <TouchableOpacity activeOpacity={0.8}
+                            onPress={() => { AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen'); }}>
                             <Image source={logout} style={{ width: 30, height: 30, resizeMode: 'contain', marginRight: 10 }} />
                         </TouchableOpacity>
 
@@ -105,287 +242,60 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState> 
                     <Image source={arrow} style={styles.iconImg} />
                 </View>
 
-                <View style={styles.itemRoot}>
+                {/* activity */}
 
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
 
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
+                {this.state.activitymap.map((item, index) =>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
+
+                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
+                            <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>{item.eventName}</Text>
                         </View>
 
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
+                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
                             </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
 
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
-
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
+                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{format(item._eventStartTime, 'MMM, DD') + " - " + format(item._eventEndTime, 'MMM, DD')}</Text>
                             </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
 
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
                         </View>
 
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+                        <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
+                            <View style={styles.posImgContainer}>
+                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    position: 'absolute',
+                                    top: 0, right: 0,
+                                    padding: 5,
+                                    backgroundColor: 'rgb(158, 149, 254)',
+                                    borderTopRightRadius: 5,
+                                    borderBottomLeftRadius: 5
+                                }}>
+                                    <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
+                                    <Text
+                                        style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
+                                </View>
                             </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
-
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
+                            <TouchableOpacity activeOpacity={0.8}
+                                style={[{ marginTop: -20 }, styles.iconContainer]}>
+                                <Image source={like} style={styles.iconImg} />
+                            </TouchableOpacity>
+                            <TouchableOpacity activeOpacity={0.8}
+                                style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
+                                <Image source={send} style={styles.iconImg} />
+                            </TouchableOpacity>
                         </View>
                     </View>
+                )}
 
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
-
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
-                    <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                        <Text style={{ paddingLeft: 20, paddingRight: 20, fontSize: 20, width: width, fontStyle: 'italic', color: 'black' }}>I want to go for hiking in the Rocky Mountain</Text>
-                    </View>
-
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={place} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Circuit of Americas</Text>
-                        </View>
-
-
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                            <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>Apr.12-Apr.14</Text>
-                        </View>
-                    </View>
-
-                    <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                        <View style={styles.posImgContainer}>
-                            <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
-                            <View style={{
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                position: 'absolute',
-                                top: 0, right: 0,
-                                padding: 5,
-                                backgroundColor: 'rgb(158, 149, 254)',
-                                borderTopRightRadius: 5,
-                                borderBottomLeftRadius: 5
-                            }}>
-                                <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                <Text
-                                    style={[styles.smallText, { color: 'white' }]}>{'7.30 AM'}</Text>
-                            </View>
-                        </View>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -20 }, styles.iconContainer]}>
-                            <Image source={like} style={styles.iconImg} />
-                        </TouchableOpacity>
-                        <TouchableOpacity activeOpacity={0.8}
-                            style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                            <Image source={send} style={styles.iconImg} />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                {/* activty end */}
                 <TouchableOpacity
                     onPress={() => { this.props.navigation.navigate('Activity'); }}
                     style={[styles.shadowBox, { alignItems: 'center', marginBottom: 10 }]} activeOpacity={0.8}>

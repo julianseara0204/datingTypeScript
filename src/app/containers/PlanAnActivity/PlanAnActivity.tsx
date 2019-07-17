@@ -8,6 +8,12 @@ import _ from "lodash";
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
 
+// import ImagePicker from 'react-native-image-picker';
+
+import { data, datapost } from '../onboarding/data';
+import axios from "axios";
+import { thisTypeAnnotation } from "@babel/types";
+
 // Images
 const cross = require('../../../assets/card_cross.png');
 const bike_riding = require('../../../assets/bike_riding.png');
@@ -39,9 +45,27 @@ type ComponentState = {
     endTime: string,
     startTime: string,
     selectedInput: string,
-    selectDateTime: "date"|"time"|"datetime",
-    isDateTimePickerVisible: boolean
+    selectDateTime: "date" | "time" | "datetime",
+    isDateTimePickerVisible: boolean,
+    Name: string,
+    filereqdata: filereq
 }
+
+type filereq = {
+
+    "entityType": string,
+    "name": string,
+    "entity": string,
+    "type": string,
+
+}
+
+interface Ivalue {
+    value: string;
+}
+
+
+
 
 export class PlanAnActivity extends Component<NavigationScreenProps, ComponentState> {
     static navigationOptions = {
@@ -58,7 +82,13 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             isDateTimePickerVisible: false,
             selectedInput: 'startDate',
             selectDateTime: 'date',
-            categories:[
+            filereqdata:	{
+                "entityType": "ACTIVITY",
+                "name": "2.jpg",
+                "type": "image/jpeg",
+                "entity": "5d2de40698dcbd77030364f8"
+              },
+            categories: [
                 {
                     id: 100,
                     label: "Bike Riding",
@@ -74,10 +104,109 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                     label: "Weekend Party",
                     img: party,
                 }
-            ]
+            ],
+            Name: 'Car Racing Competition',
         };
+
+        this.putbtn();
+
     }
-    showDateTimePicker = (value: "date"|"time"|"datetime") => {
+
+
+
+    onadd = () => {
+        console.log(this.state.endDate + "T" + this.state.endTime);
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/events',
+            data: {
+                "eventDescription": "none",
+                "eventEndTime": this.state.endDate + "T" + this.state.endTime,
+                "eventName": this.state.Name,
+                "eventStartTime": this.state.startDate + "T" + this.state.startTime,               
+                "location": {
+                    "latitude": 12.24560,
+                    "longitude": 15.65460
+                },
+                "eventType": "EVENT_BRITE",
+            },
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    putbtn = () => {
+
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
+            data: this.state.filereqdata,
+            headers: {
+                'Authorization': data.Token,
+            }
+        })
+            .then((response) => {
+
+                console.log(response.data.fileUploadUrl);
+
+                const form_data = new FormData();
+                form_data.append("image", {
+                    uri : '../../../assets/photo.png',
+                    name: 'photo.png',
+                });
+                axios({
+                    method: 'PUT',
+                    url: response.data.fileUploadUrl,
+                    data: 'C:/Users/Hanzala/Desktop/1.jpg',
+                    headers: {
+                        'Content-Type': 'image/jpeg'
+                    }
+                })
+                    .then((response) => {
+                        console.log(response);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+               
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+
+
+    }
+
+    imagepic = () => {
+
+        // ImagePicker.showImagePicker((response) => {
+        //     console.log('Response = ', response);
+
+        //     if (response.didCancel) {
+        //       console.log('User cancelled image picker');
+        //     } else if (response.error) {
+        //       console.log('ImagePicker Error: ', response.error);
+        //     } else if (response.customButton) {
+        //       console.log('User tapped custom button: ', response.customButton);
+        //     } else {
+        //       const source = { uri: response.uri };
+        //     }
+        // })
+
+    }
+
+
+    showDateTimePicker = (value: "date" | "time" | "datetime") => {
         this.setState({ selectDateTime: value, isDateTimePickerVisible: true }, this.forceUpdate);
     }
 
@@ -90,7 +219,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
         if (this.state.selectDateTime == "date") {
             if (this.state.selectedInput == "startDate") {
                 if (this.state.endDate == "TO DATE") {
-                    this.setState({ startDate: format(date, 'MM/DD/YYYY') });
+                    this.setState({ startDate: format(date, 'YYYY-MM-DD') });
                 }
                 else {
                     let startDate: any = new Date(date);
@@ -101,7 +230,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         return;
                     }
                     else {
-                        this.setState({ startDate: format(date, 'MM/DD/YYYY') });
+                        this.setState({ startDate: format(date, 'YYYY-MM-DD') });
                     }
                 }
 
@@ -110,7 +239,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             if (this.state.selectedInput == "endDate") {
 
                 if (this.state.startDate == "START DATE") {
-                    this.setState({ endDate: format(date, 'MM/DD/YYYY') });
+                    this.setState({ endDate: format(date, 'YYYY-MM-DD') });
                 }
                 else {
                     let startDate: any = new Date(this.state.startDate + " " + this.state.startTime);
@@ -121,7 +250,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         return;
                     }
                     else {
-                        this.setState({ endDate: format(date, 'MM/DD/YYYY') });
+                        this.setState({ endDate: format(date, 'YYYY-MM-DD') });
                     }
                 }
                 this.hideDateTimePicker();
@@ -131,7 +260,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
         else {
             if (this.state.selectedInput == "startDate") {
                 if (this.state.endTime == "") {
-                    this.setState({ startTime: format(date, 'HH:mm') });
+                    this.setState({ startTime: format(date, 'H:mm:ss') });
                 }
                 else {
                     let startTime: any = new Date(date);
@@ -142,7 +271,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         return;
                     }
                     else {
-                        this.setState({ startTime: format(date, 'HH:mm') });
+                        this.setState({ startTime: format(date, 'H:mm:ss') });
                     }
                 }
 
@@ -151,7 +280,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             if (this.state.selectedInput == "endDate") {
 
                 if (this.state.startTime == "") {
-                    this.setState({ endTime: format(date, 'HH:mm') });
+                    this.setState({ endTime: format(date, 'H:mm:ss') });
                 }
                 else {
                     let startTime: any = new Date(this.state.startDate + " " + this.state.startTime);
@@ -162,7 +291,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         return;
                     }
                     else {
-                        this.setState({ endTime: format(date, 'HH:mm') });
+                        this.setState({ endTime: format(date, 'H:mm:ss') });
                     }
                 }
                 this.hideDateTimePicker();
@@ -201,7 +330,9 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                             <Input
                                 placeholder={'ADD what you want to do or Activity Name'}
                                 placeholderTextColor={'#000'}
-                                style={styles.text} />
+                                style={styles.text}
+                                onChangeText={(text) => { const names = text; this.setState({ Name: names }); }}
+                            />
                         </View>
                         <Text style={styles.label}>{'PLAN LOCATION OF YOUR ACTIVITY'}</Text>
                         <View style={styles.itemContainer}>
@@ -278,11 +409,11 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
                                 <Image source={addPhoto}
                                     style={{ height: 40, width: 50, resizeMode: 'contain' }} />
-                                <Text style={{ position: 'absolute', bottom: 5, fontWeight: 'bold', fontSize: 15, color: 'grey' }}>Add Photo</Text>
+                                <Text style={{ position: 'absolute', bottom: 5, fontWeight: 'bold', fontSize: 15, color: 'grey' }} onPress={this.imagepic}>Add Photo</Text>
                             </View>
                         </View>
                     </ScrollView>
-                    <TouchableOpacity style={[styles.shadowBoxItemBtn, { width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}>
+                    <TouchableOpacity style={[styles.shadowBoxItemBtn, { width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} onPress={() => { this.onadd() }} activeOpacity={0.8}>
                         <Text style={{
                             color: '#fff',
                             paddingLeft: 30,
