@@ -42,6 +42,8 @@ type tabbarMenuItem = {
     label: string,
     img: ImageSourcePropType
 }
+
+
 type personalInfoItem = {
     name: string,
     description: string,
@@ -61,6 +63,8 @@ type arr = {
     value: string,
     privacy: string
 }
+
+
 
 type event = {
     createdAt: string,
@@ -98,11 +102,13 @@ type interset = {
 
 type CompoentState = {
     name: string,
+    Allname:string[]
     picture: string,
     index: number,
     routes: Route[],
     popup: boolean,
     tabbarMenu: tabbarMenuItem[],
+    ALLtabbarMenu: tabbarMenuItem[][],
     personalInfo: personalInfoItem[],
     userDescription: string,
     listActivities: ActivityItem[],
@@ -114,6 +120,9 @@ type CompoentState = {
 
 
 export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
+
+    _carousel: any = React.createRef()
+
     static navigationOptions = {
         header: null
     };
@@ -123,6 +132,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
         super(props);
         this.state = {
             name: "Hanzala",
+            Allname:[],
             picture: photo,
             itemarr: [],
             responsedata: [
@@ -131,7 +141,6 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             index: 0,
             routes: [
             ],
-
 
             intersetvalue: {
                 WORK: "",
@@ -156,6 +165,8 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             popup: false,
             tabbarMenu: [
             ],
+
+            ALLtabbarMenu: [],
             personalInfo: [
                 {
                     name: "work",
@@ -194,11 +205,10 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             }
         })
             .then((response) => {
-                console.log(response);
+                // console.log(response);
                 if (response.data.length > 0) {
                     routedup.push({ id: id, Picture: response.data[0].fileUrl })
                     this.setState({ picture: response.data[0].fileUrl })
-                    console.log(response.data[0].fileUrl)
                 }
                 else {
                     if (type == "USER_ACCOUNT") {
@@ -208,14 +218,15 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                         routedup.push({ id: id, Picture: '../../../../assets/back.png' })
                     }
                 }
+
+                this.setState({ routes: routedup });
             })
             .catch((error) => {
                 console.log(error);
             });
 
 
-        console.log(routedup);
-        this.setState({ routes: routedup });
+        console.log(this.state.routes);
     }
 
 
@@ -228,106 +239,104 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             }
         })
             .then((response) => {
-                // this.setState({ responsedata: response.data.profileEntries });
 
                 this.setState({ responsedata: response.data.profileEntries })
 
-                var no: number = 200;
-                const tabbarMenuDup = [];
-                // const routedup = []
 
+                const alltabbarMenuDup = []
+                const alname :string[]= []
 
-
-                tabbarMenuDup.push({
-                    id: 100,
-                    label: "32",
-                    img: birthCake,
-                },
-                    {
-                        id: 200,
-                        label: "64",
-                        img: scale_icon,
-                    })
 
                 for (var index in response.data) {
 
-                    this.setState({ picture: photo })
+                    var no: number = 200;
+                    const tabbarMenuDup = [];
+
+                    tabbarMenuDup.push({
+                        id: 100,
+                        label: "32",
+                        img: birthCake,
+                    },
+                        {
+                            id: 200,
+                            label: "64",
+                            img: scale_icon,
+                        })
+
                     this.getuserimage(response.data[index].userAccount, "USER_ACCOUNT");
 
 
-                    // routedup.push({ id: response.data[index]._id, Picture: this.state.picture });
 
 
-                    if (!index) {
-                        response.data[index].profileEntries.forEach((item: arr) => {
+                   
+                    console.log(index);
+                    response.data[index].profileEntries.forEach((item: arr) => {
 
-                            switch (item.entryType) {
-                                case "GENDER":
-                                    no = no + 100;
-                                    console.log(item.value);
-                                    break;
+                        switch (item.entryType) {
+                            case "GENDER":
+                                no = no + 100;
+                                break;
 
-                                case "HEIGHT":
-                                    no = no + 100;
-                                    tabbarMenuDup.push({
-                                        id: no,
-                                        label: item.value,
-                                        img: height_png,
-                                    });
-                                    console.log(no + 100);
-                                    break;
+                            case "HEIGHT":
+                                no = no + 100;
+                                tabbarMenuDup.push({
+                                    id: no,
+                                    label: item.value,
+                                    img: height_png,
+                                });
+                                break;
 
-                                case "DRINKING":
-                                    no = no + 100;
-                                    tabbarMenuDup.push({
-                                        id: no,
-                                        label: item.value,
-                                        img: cheers,
-                                    });
-                                    console.log(no + 100);
-                                    break;
-                                case "SMOKING":
-                                    no = no + 100;
-                                    tabbarMenuDup.push({
-                                        id: no,
-                                        label: item.value,
-                                        img: smoke,
-                                    });
-                                    console.log(no + 100);
-                                    break;
+                            case "DRINKING":
+                                no = no + 100;
+                                tabbarMenuDup.push({
+                                    id: no,
+                                    label: item.value,
+                                    img: cheers,
+                                });
+                                break;
+                            case "SMOKING":
+                                no = no + 100;
+                                tabbarMenuDup.push({
+                                    id: no,
+                                    label: item.value,
+                                    img: smoke,
+                                });
+                                break;
 
-                                case "EDUCATION_LEVEL":
-                                    no = no + 100;
-                                    tabbarMenuDup.push({
-                                        id: no,
-                                        label: item.value,
-                                        img: education,
-                                    });
-                                    console.log(no + 100);
-                                    break;
+                            case "EDUCATION_LEVEL":
+                                no = no + 100;
+                                tabbarMenuDup.push({
+                                    id: no,
+                                    label: item.value,
+                                    img: education,
+                                });
+                                break;
 
-                                case "JOB_TITLE":
-                                    console.log(item.value);
-                                    break;
+                            case "JOB_TITLE":
+                                console.log(item.value);
+                                break;
 
 
-                                case "NAME":
-                                    this.setState({ name: item.value });
-                                    console.log(item.value);
-                                    break;
+                            case "NAME":
+                                alname.push(item.value);
+                                break;
 
-                                case "WORK":
-                                    console.log(item.value);
-                                    break;
-                            }
-                        })
+                            case "WORK":
+                                break;
+                        }
+                    })
+
+                    alltabbarMenuDup.push(tabbarMenuDup);
+                    if (index=='0') {
+                        this.setState({ tabbarMenu: tabbarMenuDup });
                     }
                 }
 
-                // this.setState({ routes: routedup });
 
-                this.setState({ tabbarMenu: tabbarMenuDup });
-                console.log(this.state.responsedata);
+                this.setState({ Allname: alname });
+                this.setState({ ALLtabbarMenu: alltabbarMenuDup});                
+                this.setState({ name: this.state.Allname[0] });
+                console.log(this.state.Allname);
                 console.log(response);
 
             })
@@ -352,7 +361,6 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 response.data.forEach((arrss: event) => {
 
                     this.setState({ picture: back })
-                    // this.getuserimage(arrss._id,"EVENT");
                     const eachevent = {
                         id: arrss._id,
                         title: arrss.eventName,
@@ -369,7 +377,6 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 const ar = this.state.listActivities;
                 this.setState({ listActivities: ar });
 
-                console.log(this.state.listActivities);
                 console.log(response);
             })
             .catch((error) => {
@@ -406,12 +413,18 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
         Alert.alert(id)
     }
 
+    onPressShowCurrentIndex = (index:number) => {
+        this.setState({tabbarMenu:this.state.ALLtabbarMenu[index]})
+                        
+        this.setState({ name: this.state.Allname[index] });
+    }
+
 
     renderItem({ item, index }: { item: any, index: number }) {
         return (
             <View key={index} style={{ width: '100%', height: (width - 10) / 361 * 297, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                 <View style={styles.posImgContainer}>
-                    <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{uri: item.Picture}} />
+                    <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{ uri: item.Picture }} />
                 </View>
                 <TouchableOpacity activeOpacity={0.8}
                     style={[{ marginTop: -20 }, styles.iconContainer]}>
@@ -449,7 +462,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
     render() {
         return (
 
-            <Content>
+            <Content >
                 <View style={styles.headerContainer}>
                     <Text style={{
                         color: '#000',
@@ -465,12 +478,17 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     </View>
                 </View>
                 <Carousel
+                    ref={this._carousel}
                     data={this.state.routes}
                     renderItem={this.renderItem}
                     sliderWidth={width}
                     sliderHeight={(width - 10) / 361 * 297 + 20}
                     itemWidth={width - 10}
                     itemHeight={(width - 10) / 361 * 297 + 20}
+                    // onScrollEndDrag={this.onPressShowCurrentIndex}
+                    onSnapToItem={(index) => {
+                        this.onPressShowCurrentIndex(index);
+                    }}
                 />
                 <Text style={{
                     marginTop: 10, marginLeft: 10, color: 'black',
