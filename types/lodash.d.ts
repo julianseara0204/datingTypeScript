@@ -624,6 +624,8 @@ declare class lodash {
     zipObjectDeep(...args: any[]): any;
     zipWith(...args: any[]): any;
 }
+
+
 declare namespace lodash {
     function bind(...args: any[]): any;
     namespace bind {

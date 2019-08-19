@@ -12,7 +12,7 @@ import EducationScreen from '../EducationScreen';
 import HeightScreen from '../Height';
 import QuestionScreen from '../QuestionScreen';
 import { Container, Content } from "native-base";
-import { Route, TabbarMenuItem } from "../../../models/models";
+import { Router, TabbarMenuItem } from "../../../models/models";
 const { width, height } = Dimensions.get('window');
 import axios from "axios";
 
@@ -33,7 +33,7 @@ type ComponentProps = {
 
 type ComponentState = {
     index: number,
-    routes: Route[],
+    routes: Router[],
     tabbarMenu: TabbarMenuItem[]
 }
 
@@ -53,6 +53,7 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                 { title: 'Sample 5', type: 500 },
                 { title: 'Sample 6', type: 600 },
                 { title: 'Sample 7', type: 700 },
+            
             ],
             tabbarMenu: [
                 {
@@ -140,6 +141,22 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
         this.carouselRef.enableSnap(flag);
     }
 
+    connectycubeaccount=()=>{
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat/connectycube',           
+            headers: {
+            'Authorization': data.Token}
+        })
+        .then(function (response) {            
+            console.log("connectycubeaccount");   
+            console.log(response);          
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
     dataput=()=>{
 
         console.log(data.Token);
@@ -151,13 +168,17 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
             headers: {
             'Authorization': data.Token}
         })
-        .then(function (response) {
+        .then ((response)=> {
+           this.connectycubeaccount();
             console.log(response);          
         })
         .catch(function (error) {
             console.log(error);
         });
     }
+
+
+
 
     nextpage=()=>{        
         this.props.navigation.navigate('Home');
@@ -172,6 +193,9 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
             this.props.navigation.navigate('Home');
         }
     }
+
+
+ 
     render() {
         return (
             <Container style={styles.container}>

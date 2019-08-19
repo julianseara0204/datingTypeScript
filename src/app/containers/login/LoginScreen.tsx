@@ -34,8 +34,8 @@ class LoginScreen extends Component<NavigationScreenProps> {
         facebookuserID: undefined,
         facebookLogin: false,
         error: null,
-        username: '+923012294660',
-        password: 'H@nzala123',
+        username: '+923452942130',
+        password: 'An@s12345',
         loading:false,
         user: null,
         login:null,
@@ -81,6 +81,7 @@ class LoginScreen extends Component<NavigationScreenProps> {
                 console.log(user.signInUserSession.idToken.jwtToken);
                 this.state.token=user.signInUserSession.idToken.jwtToken;
                 data.Token=user.signInUserSession.idToken.jwtToken;
+                data.id=user.attributes.sub;
        
                 // this.Getphone();
 

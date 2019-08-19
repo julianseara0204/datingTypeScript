@@ -3,6 +3,7 @@ package com.eventdating;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
 // import com.airbnb.android.react.maps.MapsPackage;
 import com.amazonaws.RNAWSCognitoPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
@@ -17,6 +18,7 @@ import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.rnfs.RNFSPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,15 +40,17 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
-            // new MapsPackage(),
-            new RNAWSCognitoPackage(),
+          new ImagePickerPackage(),
+          new RNAWSCognitoPackage(),
           new FBSDKPackage(mCallbackManager),
           new ReactNativeWheelPickerPackage(),
           new ReanimatedPackage(),
           new ReactNativeLocalizationPackage(),
-          new RNGestureHandlerPackage()
+          new RNGestureHandlerPackage(),
+          new RNFSPackage()
       );
     }
+ 
 
     @Override
     protected String getJSMainModuleName() {

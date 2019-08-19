@@ -50,13 +50,7 @@ export class ActivityDetail extends Component<NavigationScreenProps, ComponentSt
             index: 0,
             // List of images for carosel must see how to do get images from where
             routes: [
-                { title: 'Sample 1', type: 100 },
-                { title: 'Sample 2', type: 200 },
-                { title: 'Sample 3', type: 300 },
-                { title: 'Sample 4', type: 400 },
-                { title: 'Sample 5', type: 500 },
-                { title: 'Sample 6', type: 600 },
-                { title: 'Sample 7', type: 700 },
+                
             ],
             popup: false,
             interested: 45,

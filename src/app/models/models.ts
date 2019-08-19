@@ -1,16 +1,23 @@
 // TODO: Split models
 
 export type ActivityItem = {
+    id:string
     title: string,
     location: string,
     inPeriod: string,
     beginHour: string,
-    image: any
+    image: any,
+    
 }
 
 export type Route = {
-    title: string, 
-    type: number 
+    id:string,
+    Picture: string,
+}
+
+export type Router = {
+    title:string,
+    type: number,
 }
 
 

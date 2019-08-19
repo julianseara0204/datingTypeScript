@@ -32,7 +32,8 @@ type ComponentState = {
     userName: string,
     userPrivilege: string,
     activitymap: arr[],    
-    filereqdata:filereq
+    filereqdata:filereq,
+    picture:string
 }
 
 type arr = {
@@ -69,6 +70,7 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
         super(props);
         this.state = {
             activitymap: [],
+            picture:"",
             userEmail: "example@mail.com",
             userName: "ALISA CRAIG",
             userPrivilege: "Privilege Membership",
@@ -85,6 +87,36 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
     }
 
 
+    // image
+
+    getuserimage = (id: string, type: string) => {
+
+        axios({
+            method: 'GET',
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+                // console.log(response);
+                if (response.data.length > 0) {
+                    this.setState({ picture: response.data[0].fileUrl })
+                }
+                else
+                {
+                    this.setState({picture:'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png'})
+                }
+                console.log(response);
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+    }
+
 
 
     dataput = () => {
@@ -98,6 +130,8 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
         })
             .then((response) => {
 
+                console.log(response.data.userAccount._id);
+                this.getuserimage(response.data.userAccount._id,"USER_ACCOUNT")
                 response.data.profileEntries.forEach((arrss: arritem) => {
                     if(arrss.entryType==="NAME")
                     {
@@ -183,6 +217,9 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
         AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen');
     }
 
+
+
+
     render() {
         return (
             <Content>
@@ -209,7 +246,7 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
                 </View>
                 <View style={{ justifyContent: 'center', alignItems: 'center' }}>
                     <View style={[styles.shadowBox, { width: width / 3, height: width / 3, padding: 0, borderRadius: width / 6, justifyContent: 'center', alignItems: 'center' }]}>
-                        <Image source={photo}
+                        <Image source={{uri:this.state.picture}}
                             style={{ width: width / 3, height: width / 3, borderRadius: width / 6, resizeMode: 'cover' }} />
                     </View>
                     <TouchableOpacity

@@ -8,7 +8,7 @@ import _ from "lodash";
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
 
-// import ImagePicker from 'react-native-image-picker';
+import ImagePicker from 'react-native-image-picker';
 
 import { data, datapost } from '../onboarding/data';
 import axios from "axios";
@@ -48,7 +48,10 @@ type ComponentState = {
     selectDateTime: "date" | "time" | "datetime",
     isDateTimePickerVisible: boolean,
     Name: string,
-    filereqdata: filereq
+    filereqdata: filereq,
+    avatarSource: picget,
+    Picdata: picdata
+
 }
 
 type filereq = {
@@ -58,6 +61,24 @@ type filereq = {
     "entity": string,
     "type": string,
 
+}
+
+type picget = {
+    uri: string
+}
+
+type picdata = {
+    data: string,
+    fileName: string,
+    fileSize: number,
+    height: number,
+    isVertical: boolean,
+    originalRotation: string,
+    path: string,
+    timestamp: string,
+    type: string,
+    uri: string,
+    width: number
 }
 
 interface Ivalue {
@@ -82,12 +103,26 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             isDateTimePickerVisible: false,
             selectedInput: 'startDate',
             selectDateTime: 'date',
-            filereqdata:	{
+            avatarSource: { uri: "https://unpkg.com/react-native-image-crop-picker@0.21.1/svg.svg" },
+            Picdata: {
+                data: "string",
+                fileName: "string",
+                fileSize: 0,
+                height: 0,
+                isVertical: true,
+                originalRotation: "string",
+                path: "string",
+                timestamp: "string",
+                type: "number",
+                uri: "boolean",
+                width: 0
+            },
+            filereqdata: {
                 "entityType": "ACTIVITY",
                 "name": "2.jpg",
                 "type": "image/jpeg",
                 "entity": "5d2de40698dcbd77030364f8"
-              },
+            },
             categories: [
                 {
                     id: 100,
@@ -108,7 +143,6 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             Name: 'Car Racing Competition',
         };
 
-        this.putbtn();
 
     }
 
@@ -123,7 +157,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 "eventDescription": "none",
                 "eventEndTime": this.state.endDate + "T" + this.state.endTime,
                 "eventName": this.state.Name,
-                "eventStartTime": this.state.startDate + "T" + this.state.startTime,               
+                "eventStartTime": this.state.startDate + "T" + this.state.startTime,
                 "location": {
                     "latitude": 12.24560,
                     "longitude": 15.65460
@@ -142,7 +176,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             });
     }
 
-    putbtn = () => {
+    putbtn = (uri: string, fileName: any, type: any) => {
 
         axios({
             method: 'POST',
@@ -158,15 +192,15 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
                 const form_data = new FormData();
                 form_data.append("image", {
-                    uri : '../../../assets/photo.png',
-                    name: 'photo.png',
+                    uri: uri,
+                    name: fileName,
                 });
                 axios({
                     method: 'PUT',
                     url: response.data.fileUploadUrl,
-                    data: 'C:/Users/Hanzala/Desktop/1.jpg',
+                    data: form_data,
                     headers: {
-                        'Content-Type': 'image/jpeg'
+                        'Content-Type': type
                     }
                 })
                     .then((response) => {
@@ -176,7 +210,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         console.log(error);
                     });
 
-               
+
             })
             .catch((error) => {
                 console.log(error);
@@ -187,22 +221,79 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
     }
 
-    imagepic = () => {
+    selectPhotoTapped = () => {
+        const options = {
+            quality: 1.0,
+            maxWidth: 500,
+            maxHeight: 500,
+            storageOptions: {
+                skipBackup: true,
+            },
+        };
 
-        // ImagePicker.showImagePicker((response) => {
-        //     console.log('Response = ', response);
+        ImagePicker.showImagePicker(options, response => {
+            console.log('Response = ', response);
 
-        //     if (response.didCancel) {
-        //       console.log('User cancelled image picker');
-        //     } else if (response.error) {
-        //       console.log('ImagePicker Error: ', response.error);
-        //     } else if (response.customButton) {
-        //       console.log('User tapped custom button: ', response.customButton);
-        //     } else {
-        //       const source = { uri: response.uri };
-        //     }
-        // })
+            if (response.didCancel) {
+                console.log('User cancelled photo picker');
+            } else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+                console.log('User tapped custom button: ', response.customButton);
+            } else {
+                const source = { uri: response.uri };
+                // this.putbtn(response.uri,response.fileName,response.type)
 
+                axios({
+                    method: 'POST',
+                    url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
+                    data: this.state.filereqdata,
+                    headers: {
+                        'Authorization': data.Token,
+                    }
+                })
+                    .then((response1) => {
+
+                        console.log(response1.data.fileUploadUrl);
+
+
+
+                        const form_data = new FormData();
+                        form_data.append("image", {
+                            uri: response.uri,
+                            name: response.fileName,
+                        });
+
+
+
+
+                        axios({
+                            method: 'PUT',
+                            url: response1.data.fileUploadUrl,
+                            data: response.data,
+                            headers: {
+                                'Content-Type': 'image/jpeg',
+                                'Content-Encoding': 'base64'
+                            }
+                        })
+                            .then((response2) => {
+                                console.log(response2);
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+
+
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                    });
+
+                // You can also display the image using data:
+                // let source = { uri: 'data:image/jpeg;base64,' + response.data };
+                this.setState({ avatarSource: source });
+            }
+        });
     }
 
 
@@ -406,10 +497,9 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         })}
                         <View>
                             <View style={[styles.photoShadowBox, { backgroundColor: '#dadada', height: width / 4, width: width / 3, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
-
-                                <Image source={addPhoto}
+                                <Image source={this.state.avatarSource}
                                     style={{ height: 40, width: 50, resizeMode: 'contain' }} />
-                                <Text style={{ position: 'absolute', bottom: 5, fontWeight: 'bold', fontSize: 15, color: 'grey' }} onPress={this.imagepic}>Add Photo</Text>
+                                <Text style={{ position: 'absolute', bottom: 5, fontWeight: 'bold', fontSize: 15, color: 'grey' }} onPress={this.selectPhotoTapped}>Add Photo</Text>
                             </View>
                         </View>
                     </ScrollView>

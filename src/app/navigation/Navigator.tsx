@@ -22,11 +22,14 @@ import ActivityDetail from "../containers/ActivityDetail";
 import InvitedEventDetail from "../containers/InvitedEventDetail";
 import OBTabScreen from "../containers/onboarding/OBTabScreen";
 import { string } from "prop-types";
+import msg from "../containers/Home/DashboardMessage/DashboardMessage";
+import Dashboard from "../containers/Home/Dashboard/Dashboard";
 
 
 
-// const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
-const LoginStack = createStackNavigator({ Landing, OtpScreen });
+const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
+// const LoginStack = createStackNavigator({ InvitedProfile, OtpScreen });
+// const LoginStack = createStackNavigator({ AccountSetting, OtpScreen });
 
 
 //const AuthTabs = createBottomTabNavigator({LoginStack, RegisterScreen});
@@ -54,6 +57,8 @@ const RootSwitch = createStackNavigator(
         Match,
         ActivityDetail,
         InvitedEventDetail,
+        msg,
+        Dashboard,
     },
     { headerMode: 'none' });
 

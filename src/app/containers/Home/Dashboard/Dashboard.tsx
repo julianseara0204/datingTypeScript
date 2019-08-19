@@ -102,20 +102,20 @@ type interset = {
 
 type CompoentState = {
     name: string,
-    Allname:string[]
+    Allname: any
     picture: string,
     index: number,
     routes: Route[],
     popup: boolean,
     tabbarMenu: tabbarMenuItem[],
-    ALLtabbarMenu: tabbarMenuItem[][],
+    ALLtabbarMenu: any,
     personalInfo: personalInfoItem[],
     userDescription: string,
     listActivities: ActivityItem[],
     responsedata: arr[],
     itemarr: ActivityItem[],
-
-    intersetvalue: interset
+    intersetvalue: interset,
+    Location:string
 }
 
 
@@ -132,7 +132,8 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
         super(props);
         this.state = {
             name: "Hanzala",
-            Allname:[],
+            Location:"",
+            Allname: {},
             picture: photo,
             itemarr: [],
             responsedata: [
@@ -166,7 +167,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             tabbarMenu: [
             ],
 
-            ALLtabbarMenu: [],
+            ALLtabbarMenu: {},
             personalInfo: [
                 {
                     name: "work",
@@ -207,26 +208,28 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             .then((response) => {
                 // console.log(response);
                 if (response.data.length > 0) {
-                    routedup.push({ id: id, Picture: response.data[0].fileUrl })
-                    this.setState({ picture: response.data[0].fileUrl })
+                    console.log(id);
+                    console.log(response.data[response.data.length-1].fileUrl);
+                    this.state.routes.push({ id: id, Picture: response.data[response.data.length-1].fileUrl })
+                    this.setState({ picture: response.data[response.data.length-1].fileUrl })
                 }
                 else {
                     if (type == "USER_ACCOUNT") {
-                        routedup.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
+                        this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
                     }
                     else if (type == "EVENTS") {
-                        routedup.push({ id: id, Picture: '../../../../assets/back.png' })
+                        this.state.routes.push({ id: id, Picture: '../../../../assets/back.png' })
                     }
                 }
 
-                this.setState({ routes: routedup });
+                // this.setState({ routes: routedup });
             })
             .catch((error) => {
                 console.log(error);
             });
 
 
-        console.log(this.state.routes);
+
     }
 
 
@@ -243,13 +246,15 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 this.setState({ responsedata: response.data.profileEntries })
 
 
-                const alltabbarMenuDup = []
-                const alname :string[]= []
-
+                const alltabbarMenuDup:any = {}
+                const alname: any = {}
+                var indexno: number = -1;
 
                 for (var index in response.data) {
+                    indexno = indexno + 1;
 
                     var no: number = 200;
+
                     const tabbarMenuDup = [];
 
                     tabbarMenuDup.push({
@@ -265,11 +270,8 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                     this.getuserimage(response.data[index].userAccount, "USER_ACCOUNT");
 
+                    alname[response.data[index].userAccount] = {Name:"",Location:"TORONTO"}
 
-
-
-                   
-                    console.log(index);
                     response.data[index].profileEntries.forEach((item: arr) => {
 
                         switch (item.entryType) {
@@ -313,12 +315,11 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                                 break;
 
                             case "JOB_TITLE":
-                                console.log(item.value);
                                 break;
 
 
                             case "NAME":
-                                alname.push(item.value);
+                                alname[response.data[index].userAccount]['Name'] = item.value;
                                 break;
 
                             case "WORK":
@@ -326,15 +327,18 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                         }
                     })
 
-                    alltabbarMenuDup.push(tabbarMenuDup);
-                    if (index=='0') {
+                    
+                    alltabbarMenuDup[response.data[index].userAccount]=tabbarMenuDup;
+                    // alltabbarMenuDup.push(tabbarMenuDup);
+                    if (index == '0') {
                         this.setState({ tabbarMenu: tabbarMenuDup });
                     }
                 }
 
 
+                console.log(this.state.routes);
                 this.setState({ Allname: alname });
-                this.setState({ ALLtabbarMenu: alltabbarMenuDup});                
+                this.setState({ ALLtabbarMenu: alltabbarMenuDup });
                 this.setState({ name: this.state.Allname[0] });
                 console.log(this.state.Allname);
                 console.log(response);
@@ -360,18 +364,45 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                 response.data.forEach((arrss: event) => {
 
-                    this.setState({ picture: back })
-                    const eachevent = {
-                        id: arrss._id,
-                        title: arrss.eventName,
-                        location: "Circuit of Americas",
-                        inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
-                        beginHour: "7.30 AM",
-                        image: this.state.picture,
-                    }
 
-                    // this.state.itemarr.push(eachevent);     
-                    this.state.listActivities.push(eachevent);
+                    var pic = "";
+                    axios({
+                        method: 'GET',
+                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=EVENT&entity=" + arrss._id + "",
+                        headers: {
+                            'Authorization': data.Token
+                        }
+                    })
+                        .then((imgresponse) => {
+                            console.log(imgresponse)
+                            if (imgresponse.data.length > 0) {
+                                console.log(imgresponse.data[0].fileUrl);
+                                pic = imgresponse.data[0].fileUrl;
+
+                            }
+                            else {
+                                pic = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSo469VtmD8F7-XVn2i6boJrdfdWIogcMwv1XWs-8cIFy6qAFDa";
+                            }
+
+                            this.setState({ picture: back })
+
+                            const eachevent = {
+                                id: arrss._id,
+                                title: arrss.eventName,
+                                location: "Circuit of Americas",
+                                inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
+                                beginHour: "7.30 AM",
+                                image: pic,
+                            }
+
+                            // this.state.itemarr.push(eachevent);     
+                            this.state.listActivities.push(eachevent);
+
+                            // this.setState({ routes: routedup });
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
                 });
 
                 const ar = this.state.listActivities;
@@ -409,14 +440,37 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             });
     }
 
+    getuserinterest=(id:any)=>{
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
+            data: {
+                "interaction": "LIKED",
+                "type": "EVENT",
+                "entity": id
+            },
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    
+    }
+
     useriddd = (id: string) => {
         Alert.alert(id)
     }
 
-    onPressShowCurrentIndex = (index:number) => {
-        this.setState({tabbarMenu:this.state.ALLtabbarMenu[index]})
-                        
-        this.setState({ name: this.state.Allname[index] });
+    onPressShowCurrentIndex = (index: number) => {        
+        this.setState({ tabbarMenu: this.state.ALLtabbarMenu[this._carousel.current.props.data[index].id] })
+        this.setState({ name: this.state.Allname[this._carousel.current.props.data[index].id]['Name'] });
+        this.setState({ Location: this.state.Allname[this._carousel.current.props.data[index].id]['Location'] });
     }
 
 
@@ -473,7 +527,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                         <Text style={{
                             color: '#000',
                             fontSize: 15
-                        }}>TORONTO</Text>
+                        }}>{this.state.Location}</Text>
                         <Image source={pos} style={styles.posImg} />
                     </View>
                 </View>
@@ -567,7 +621,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                         <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                             <View style={styles.posImgContainer}>
-                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={back} />
+                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{uri:item.image}} />
                                 <View style={{
                                     flexDirection: 'row',
                                     alignItems: 'center',
@@ -593,6 +647,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                                 <Image source={like} style={styles.iconImg} />
                             </TouchableOpacity>
                             <TouchableOpacity activeOpacity={0.8}
+                            onPress={()=>{this.props.navigation.navigate('InviteToActivity',{id:item.id,Name:item.title})}}
                                 style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
                                 <Image source={send} style={styles.iconImg} />
                             </TouchableOpacity>
