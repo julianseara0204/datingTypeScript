@@ -62,7 +62,6 @@
     "metro-react-native-babel-preset": "0.53.1",
     "react-native-typescript-transformer": "^1.2.12",
     "react-test-renderer": "16.8.3",
-    "reactotron-react-native": "^3.6.4",
     "tslint": "^5.15.0",
     "tslint-eslint-rules": "^5.4.0",
     "tslint-react": "^4.0.0",

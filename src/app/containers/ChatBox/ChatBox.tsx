@@ -6,7 +6,6 @@ import styles from "./styles";
 import _ from "lodash";
 import { GiftedChat, Send, Bubble, Message, Avatar } from "react-native-gifted-chat";
 import { MessageItem } from '../../models/models'
-import Reactotron from 'reactotron-react-native'
 
 const { width } = Dimensions.get('window');
 
@@ -31,7 +30,7 @@ type CompenentState = {
     dialogid: string;
     opponentId: number,
     type: number,
-    Name:string,
+    Name: string,
     Picdata: picdata
 }
 
@@ -63,9 +62,9 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
             msg: "Hello dear!",
             messages: [],
             Name: props.navigation.state.params.name,
-            dialogid: props.navigation.state.params.dialogid,
-            // opponentId: props.navigation.state.params.opponentId,158492            
-            opponentId: 160020,
+            dialogid: props.navigation.state.params.dialoagid,
+            opponentId: props.navigation.state.params.opponentId,
+            // opponentId: 160020,
             type: props.navigation.state.params.type,
             Picdata: {
                 data: "string",
@@ -83,7 +82,7 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         };
 
 
-        Reactotron.log(props);
+        console.log(props);
         // ConnectyCube.init({
         //     appId: 1009,
         //     authKey: 'yPeUCVOZDZPMVNA',
@@ -114,6 +113,22 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         // .catch((error) => {
         //     console.log(error);
         // });
+
+        var params = {
+            type: 2,
+            occupants_ids: [160020, 164126],
+            name: 'Hawaii group team'
+        };
+
+        // ConnectyCube.chat.dialog.create(params, function(error:any, conversation:any) {
+        //     if (conversation) {
+        //         console.log("conversation")
+        //         console.log(conversation)
+        //     } else {
+        //         console.log("user error")
+        //         console.log(error)
+        //     }
+        // });
     }
 
 
@@ -134,7 +149,7 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         });
     }
 
-    addcontact=(userId:number)=>{
+    addcontact = (userId: number) => {
         // ConnectyCube.chat.contactlist.add(160020, function(error: any, contact: any) {
         //     if (contact) {
         //         console.log("contact")
@@ -145,27 +160,27 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         //     }
         // });
 
-        ConnectyCube.chat.contactlist.get(function(error: any,contactlist:any) {
+        ConnectyCube.chat.contactlist.get(function (error: any, contactlist: any) {
             if (contactlist) {
-                        console.log("contact get")
-                        console.log(contactlist)
-                    } else {
-                        console.log("contactget error")
-                        console.log(error)
-                    }
+                console.log("contact get")
+                console.log(contactlist)
+            } else {
+                console.log("contactget error")
+                console.log(error)
+            }
         });
 
     }
 
     connectgroup = () => {
         var dialogId = this.state.dialogid;
-        Reactotron.log('connectgroup',this.state);
-        Reactotron.log('jid',ConnectyCube.chat.helpers.getRoomJidFromDialogId(dialogId));
+        console.log('connectgroup', this.state);
+        console.log('jid', ConnectyCube.chat.helpers.getRoomJidFromDialogId(dialogId));
         ConnectyCube.chat.muc.join(ConnectyCube.chat.helpers.getRoomJidFromDialogId(dialogId), (error: any, group: any) => {
             if (group) {
-                Reactotron.log("group",group)
+                console.log("group", group)
             } else {
-                Reactotron.log("group error",error)
+                console.log("group error", error)
                 console.log(error)
             }
         });
@@ -193,26 +208,25 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
             userCredentials,
             (error: any, contactList: any) => {
                 if (contactList) {
-                    Reactotron.log("contactList")
-                    Reactotron.log(contactList)
-                    // this.connectgroup();
+                    console.log("contactList")
+                    console.log(contactList)
                     this.getmessage(100);
                     this.connectgroup();
                     this.onlistenermsg();
-                    
+
                 } else {
-                    Reactotron.log("contactList error")
-                    Reactotron.log(error)
+                    console.log("contactList error")
+                    console.log(error)
                 }
             }
         );
     }
 
-    onlistenermsg=()=>{
+    onlistenermsg = () => {
         ConnectyCube.chat.onMessageListener = this.getonemsg.bind(this)
     }
 
-    getonemsg=()=>{
+    getonemsg = () => {
         this.getmessage(1);
     }
 
@@ -229,32 +243,32 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
                 var id = 1000;
                 messages.items.reverse().forEach((item: any) => {
                     id = this.state.messages.length;
-                    var msg = {
+                    var msg: any = {
                         _id: item._id,
-                        text: item.message + "  " + id,
+                        text: item.message,
                         createdAt: item.created_at,
                         user: {
                             _id: item.sender_id,
                             name: "React Native",
                             avatar: { url: "https://placeimg.com/140/140/any" }
                         },
-                        image: item.attachments.length>0  ? ConnectyCube.storage.privateUrl(item.attachments[0].uid):'',
-                        
-                        video: item.attachments.length>0 && item.attachments[0].type=="video"  ? ConnectyCube.storage.privateUrl(item.attachments[0].uid):'',
-                        
+                        image: item.attachments.length > 0 ? ConnectyCube.storage.privateUrl(item.attachments[0].uid) : '',
+
+                        video: item.attachments.length > 0 && item.attachments[0].type == "video" ? ConnectyCube.storage.privateUrl(item.attachments[0].uid) : '',
+
                     }
-                    if(this.state.messages.length>0 && this.state.messages[0].user._id!=item._id)
-                    {                        
-                    arr.unshift(msg);
-                    this.setState({ messages: arr });
+                    if (this.state.messages.length > 0 && this.state.messages[0]._id != item._id) {
+                        this.setState(previousState => ({
+                            messages: GiftedChat.append(previousState.messages, msg)
+                        }));
                     }
-                    else if(this.state.messages.length==0)
-                    {                        
-                    arr.unshift(msg);
-                    this.setState({ messages: arr });
+                    else if (this.state.messages.length < 1) {
+                        this.setState(previousState => ({
+                            messages: GiftedChat.append(previousState.messages, msg)
+                        }));
                     }
                 })
-                console.log(arr);
+                console.log(this.state.messages);
 
             } else {
                 console.log("messages error")
@@ -262,8 +276,6 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
             }
 
         });
-
-
     }
 
 
@@ -271,7 +283,7 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
     sendmessage = (msg: string) => {
 
         var dialog = { _id: this.state.dialogid, type: this.state.type };
-        Reactotron.log('sendmessage',dialog);
+        console.log('sendmessage', dialog);
 
         var message = {
             type: dialog.type === 3 ? 'chat' : 'groupchat',
@@ -284,18 +296,15 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         };
 
         var opponentId = dialog.type === 3 ? this.state.opponentId : ConnectyCube.chat.helpers.getRoomJidFromDialogId(dialog._id); //160020
-        Reactotron.log('opponet',opponentId);
+        console.log('opponet', opponentId);
         let id = ConnectyCube.chat.send(opponentId, message);
         console.log(id);
 
-        if(id!="")
-        {
-        this.getmessage(1);
+        if (id != "") {
+            this.getmessage(1);
         }
         function onMessage(userId: any, message: any) {
         }
-
-        // this.getmessage();
 
     }
 
@@ -325,14 +334,16 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
                 const source = { uri: response.uri };
 
                 var fileParams = { name: this.state.Picdata.fileName, file: this.state.Picdata, type: this.state.Picdata.type, size: this.state.Picdata.fileSize, public: false };
-                ConnectyCube.storage.createAndUpload(fileParams,  (error:any, result:any)=> {
+                ConnectyCube.storage.createAndUpload(fileParams, (error: any, result: any) => {
                     if (!error) {
                         var fileUID = result.uid;
                         console.log(result)
                         // prepare a message
+
+                        var dialog = { _id: this.state.dialogid, type: this.state.type };
                         var message = {
-                            type: this.state.type === 3 ? 'chat' : 'groupchat',
-                            body: 'attachment',
+                            type: dialog.type === 3 ? 'chat' : 'groupchat',
+                            body: '',
                             extension: {
                                 save_to_history: 1,
                                 dialog_id: this.state.dialogid,
@@ -340,13 +351,12 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
                             }
                         };
 
-                        let id = ConnectyCube.chat.send(this.state.opponentId, message);
+                        var opponentId = dialog.type === 3 ? this.state.opponentId : ConnectyCube.chat.helpers.getRoomJidFromDialogId(dialog._id); //160020
+
+                        let id = ConnectyCube.chat.send(opponentId, message);
                         console.log(id);
 
-                        if(id!="")
-                        {
                         this.getmessage(1);
-                        }
                     }
                 });
             }
@@ -387,10 +397,12 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
         this.sendmessage(messages[0]['text']);
         console.log(this.state.messages)
         this.setState({ messages: this.state.messages })
-        console.log(messages[0]['text'])
-        this.setState(previousState => ({
-            messages: GiftedChat.append(previousState.messages, messages)
-        }));
+        console.log(this.state)
+        console.log(messages);
+
+        // this.setState(previousState => ({
+        //     messages: GiftedChat.append(previousState.messages, messages)
+        // }));
     }
 
     componentWillMount() {
@@ -403,8 +415,8 @@ export class ChatBox extends Component<NavigationScreenProps, CompenentState> {
 
     renderSend = (props: any) => {
         return (
-            <View style={{ flexDirection: 'row', height: '100%', alignContent: 'center', paddingRight: 10 }}>
-                <Icon name='plus' type='FontAwesome5' style={styles.inputIcon} onPress={this.selectPhotoTapped}/>
+            <View style={{ flexDirection: 'row', height: '100%', alignContent: 'center', paddingRight: 5 }}>
+                <Icon name='plus' type='FontAwesome5' style={styles.inputIcon} onPress={this.selectPhotoTapped} />
                 <Send {...props}>
                     <View style={{ flexDirection: 'row', height: '100%', alignContent: 'center' }}>
                         <Icon name='send-o' type='FontAwesome' style={styles.inputIcon} />

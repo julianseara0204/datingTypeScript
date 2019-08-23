@@ -228,10 +228,10 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
                     <Text style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}>MY PROFILE</Text>
                     <View style={{ flexDirection: 'row' }}>
 
-                        <TouchableOpacity activeOpacity={0.8}
+                        {/* <TouchableOpacity activeOpacity={0.8}
                             onPress={() => { AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen'); }}>
                             <Image source={logout} style={{ width: 30, height: 30, resizeMode: 'contain', marginRight: 10 }} />
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
 
 
                         <TouchableOpacity activeOpacity={0.8}

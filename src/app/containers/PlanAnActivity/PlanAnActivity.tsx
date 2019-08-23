@@ -272,8 +272,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                             url: response1.data.fileUploadUrl,
                             data: response.data,
                             headers: {
-                                'Content-Type': 'image/jpeg',
-                                'Content-Encoding': 'base64'
+                                'Content-Type': 'application/json',
                             }
                         })
                             .then((response2) => {

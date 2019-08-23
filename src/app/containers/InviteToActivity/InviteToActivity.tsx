@@ -9,11 +9,14 @@ const { width, height } = Dimensions.get('window');
 import { forEach } from "../../../../types/lodash";
 
 
+import Footerstyles from "./HomeFooter/styles";
+
 import { data, datapost } from '../onboarding/data';
 import axios from "axios";
 
 const photo = require('../../../assets/photo.png');
 const search = require('../../../assets/search.png');
+const send = require("../../../assets/send.png");
 
 type arr = {
     _id: string,
@@ -25,7 +28,8 @@ type arr = {
 type CompenentState = {
     id: string
     Name: string,
-    Allname: any
+    Allname: any,
+    checkuser: any
 }
 export class InviteToActivity extends Component<NavigationScreenProps, CompenentState> {
     static navigationOptions = {
@@ -36,49 +40,94 @@ export class InviteToActivity extends Component<NavigationScreenProps, Compenent
         super(props);
         console.log(props);
         this.state = {
-            Name: "props.navigation.state.params.Name",
-            id: "props.navigation.state.params.id",
-            Allname: []
+            Name: props.navigation.state.params.Name,
+            id: props.navigation.state.params.id,
+            Allname: [],
+            checkuser: {}
         };
         this.dataput();
 
     }
 
-    getimg=(id:string,name:string)=>{
+    getimg = (id: string, name: string) => {
 
-        
+        this.state.checkuser[id] = false;
+
         const alname: any = this.state.Allname;
-        const eachdata={ id: id, Name: "Known", Eventid: this.state.id, EventName: this.state.Name, Picture: "" }
-        eachdata['Name']=name;
+        const eachdata = { id: id, Name: "Known", Eventid: this.state.id, EventName: this.state.Name, Picture: "" }
+        eachdata['Name'] = name != "" ? name : "Known";
         axios({
             method: 'GET',
-            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=USRER_ACCOUNT&entity=" + id + "",
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=USER_ACCOUNT&entity=" + id + "",
             headers: {
                 'Authorization': data.Token
             }
         })
             .then((response) => {
-                // console.log(response);
+                console.log(response);
                 if (response.data.length > 0) {
                     console.log(response.data[response.data.length - 1].fileUrl);
-                    eachdata['Picture']= response.data[response.data.length - 1].fileUrl;
+                    eachdata['Picture'] = response.data[response.data.length - 1].fileUrl;
+
+                    console.log(eachdata)
+                    alname.push(eachdata);
+                    this.setState({ Allname: alname });
                 }
                 else {
-                    eachdata['Picture']= 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png'
-                 }
+                    eachdata['Picture'] = 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png'
+
+                    console.log(eachdata)
+                    alname.push(eachdata);
+                    this.setState({ Allname: alname });
+                }
 
             })
             .catch((error) => {
                 console.log(error);
             });
-
-            alname.push(data);
-
-            
-            this.setState({ Allname: alname });
     }
-    
 
+
+    usercheckbox = (id: string) => {
+        this.state.checkuser[id] = this.state.checkuser[id] == false ? this.state.checkuser[id] = true : this.state.checkuser[id] = false;
+    }
+
+    share=()=>{
+        for (var key in this.state.checkuser) {
+            if (this.state.checkuser.hasOwnProperty(key)) {
+                if (this.state.checkuser[key] == true) {
+                    var value = this.state.checkuser[key];
+                    console.log(value + key);
+                    // this.invite(key);
+                }
+            }
+        }
+        Alert.alert("Successfully invited to all users")
+    }
+
+    invite=(userid:any)=>{
+
+        var postdata={
+            "event":  this.state.id,
+            "message": "",
+            "invitee": userid,
+          };
+          
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/events/invite',
+            headers: {
+                'Authorization': data.Token
+            }, 
+            data: postdata,
+        }).then((response) => {
+                console.log(response);               
+                console.log(this.state.checkuser);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
 
     dataput = () => {
         axios({
@@ -89,12 +138,9 @@ export class InviteToActivity extends Component<NavigationScreenProps, Compenent
             }
         })
             .then((response) => {
-
                 console.log(response);
                 for (var index in response.data) {
-
-                    var name=""
-
+                    var name = ""
                     response.data[index].profileEntries.forEach((item: arr) => {
                         switch (item.entryType) {
                             case "NAME":
@@ -102,13 +148,9 @@ export class InviteToActivity extends Component<NavigationScreenProps, Compenent
                                 break;
                         }
                     })
-                    this.getimg(response.data[index].userAccount,name);
-
+                    this.getimg(response.data[index].userAccount, name);
                 }
-
-
-                console.log(this.state.Allname);
-
+                console.log(this.state.checkuser);
             })
             .catch((error) => {
                 console.log(error);
@@ -145,21 +187,29 @@ export class InviteToActivity extends Component<NavigationScreenProps, Compenent
                         <View style={[styles.itemContainer, { borderBottomWidth: 1 }]}>
                             <View style={styles.itemSubContainer}>
                                 <TouchableOpacity activeOpacity={0.8} style={styles.photoContainer}>
-                                    <Image source={{uri:item.Picture}} style={styles.photo} />
+                                    <Image source={{ uri: item.Picture }} style={styles.photo} />
                                 </TouchableOpacity>
                                 <View style={styles.descGroup}>
                                     <Text style={styles.name}>{item.Name}</Text>
                                     <Text style={styles.desc}>{this.state.Name}</Text>
                                 </View>
                             </View>
-                            <CheckBox onChange={() => { console.log(item) }} />
+                            <CheckBox onChange={() => { this.usercheckbox(item.id) }} />
                         </View>
 
                     )}
                     <View style={{ height: 60, backgroundColor: 'white' }} />
                 </Content>
 
-                <HomeFooter navigation={this.props.navigation} />
+                {/* <HomeFooter navigation={this.props.navigation} /> */}
+                <View style={Footerstyles.container}>
+                    <Text>Share</Text>
+                    <TouchableOpacity activeOpacity={0.8}
+                    onPress={()=>{this.share()}}
+                        style={[{ marginTop: -60, alignSelf: 'flex-end' }, Footerstyles.iconContainer]}>
+                        <Image source={send} style={Footerstyles.iconImg} />
+                    </TouchableOpacity>
+                </View>
             </Container>
         );
     }

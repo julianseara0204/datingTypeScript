@@ -320,6 +320,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                             case "NAME":
                                 alname[response.data[index].userAccount]['Name'] = item.value;
+                                
                                 break;
 
                             case "WORK":
@@ -327,7 +328,10 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                         }
                     })
 
-                    
+                    if (index.toString() == '0') {
+                        this.setState({ name: alname[response.data[index].userAccount]['Name'] });
+                        this.setState({ Location: alname[response.data[index].userAccount]['Location'] });
+                    }
                     alltabbarMenuDup[response.data[index].userAccount]=tabbarMenuDup;
                     // alltabbarMenuDup.push(tabbarMenuDup);
                     if (index == '0') {
@@ -339,9 +343,9 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 console.log(this.state.routes);
                 this.setState({ Allname: alname });
                 this.setState({ ALLtabbarMenu: alltabbarMenuDup });
-                this.setState({ name: this.state.Allname[0] });
                 console.log(this.state.Allname);
                 console.log(response);
+                
 
             })
             .catch((error) => {
@@ -590,7 +594,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                 {this.state.listActivities.map((item, index) =>
                     <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-
+{/* 
                         <View style={{ flexDirection: 'column', padding: 10, width: width }}>
                             <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
                             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
@@ -599,7 +603,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                                     <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
                                 </TouchableOpacity>
                             </View>
-                        </View>
+                        </View> */}
 
                         <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
                             <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>{item.title}</Text>

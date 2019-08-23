@@ -459,7 +459,7 @@ like = (id: string, type: string) => {
                     </View>
                     <View
                         style={[styles.shadowBoxItem, { flexDirection: 'row', justifyContent: 'flex-end' }]}>
-                        <Text style={[styles.desc, { width: width / 2 }]}>John Doe shown interest in your profile</Text>
+                        <Text style={[styles.desc, { width: width / 2 }]}>{this.state.Name} shown interest in your profile</Text>
                         <Image source={photo} style={styles.subImage} />
 
                         <View style={[styles.photoContainer, { position: 'absolute', top: -width / 10, left: 10 }]}>

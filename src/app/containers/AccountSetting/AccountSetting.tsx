@@ -8,12 +8,16 @@ import strings from "./strings";
 // import _ from "lodash";
 
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Platform } from "react-native";
+import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Platform, AsyncStorage } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content, Icon ,Input} from "native-base"
 import styles from "./styles";
 import _ from "lodash";
 
+import { data, datapost } from '../onboarding/data';
+import axios from "axios";
+
+import { format } from 'date-fns';
 
 // import {ToggleSwitch} from 'toggle-switch-react-native';
 
@@ -54,6 +58,7 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
             instagram: false,
             facebook: false
         };
+        this.getphone();
     }
 
     componentDidMount(){
@@ -108,6 +113,25 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                 // this.setState({[parameterName]: isOn});
             } 
         }
+    }
+
+    getphone=()=>{        
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/cognito?cognitoId='+data.id+'',
+        })
+            .then((response) => {
+                this.setState({ phone: response.data.phoneNumber });
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
+    
+    logout = () => {
+        AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen');
     }
 
     render() {
@@ -259,7 +283,9 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                         </View>
                     </View>
 
-                    <TouchableOpacity style={[styles.shadowBoxItemBtn, { backgroundColor: 'white', width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}>
+                    <TouchableOpacity style={[styles.shadowBoxItemBtn, { backgroundColor: 'white', width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}
+                    onPress={() => { this.logout() }}
+                    >
                         <Text style={styles.logOut}>{strings.logOut}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.shadowBoxItemBtn, { backgroundColor: 'white', width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}>

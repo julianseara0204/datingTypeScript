@@ -25,11 +25,10 @@ import { string } from "prop-types";
 import msg from "../containers/Home/DashboardMessage/DashboardMessage";
 import Dashboard from "../containers/Home/Dashboard/Dashboard";
 
+    
 
-
+// const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
 const LoginStack = createStackNavigator({ LoginScreen, OtpScreen });
-// const LoginStack = createStackNavigator({ InvitedProfile, OtpScreen });
-// const LoginStack = createStackNavigator({ AccountSetting, OtpScreen });
 
 
 //const AuthTabs = createBottomTabNavigator({LoginStack, RegisterScreen});

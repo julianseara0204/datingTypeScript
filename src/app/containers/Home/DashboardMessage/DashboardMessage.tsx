@@ -5,7 +5,6 @@ import { Content } from "native-base";
 import { Route } from "../../../models/models"
 import styles from "./styles";
 import _ from "lodash";
-import Reactotron from 'reactotron-react-native'
 
 
 
@@ -28,7 +27,7 @@ type ComponentState = {
     popup: boolean,
     userid: number,
     pid: number,
-    dialogs: dialog[],  
+    dialogs: dialog[],
 }
 
 type dialog = {
@@ -36,9 +35,9 @@ type dialog = {
     lastmsg: string,
     name: string,
     time: Date,
-    opponentId:number
+    opponentId: number
     Avast: string,
-    type:number
+    type: number
 }
 
 
@@ -69,7 +68,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
         });
 
         this.see();
-        this.like();
+        // this.like();
     }
 
 
@@ -90,6 +89,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                 console.log(user)
                 this.setState({ userid: user.id })
                 // this.getdialog();
+                this.like();
             } else {
                 console.log("user error")
                 console.log(error)
@@ -121,14 +121,13 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
 
     getdialog = () => {
-        // var dialogId = '5d3c6cf7ca8bf402721ea536';
         var dialogId = '5d3daf60ca8bf45ff71d9a9e';
         var filter = { opponentId: 160020, sort_desc: 'date_sent', limit: 100, skip: 0 };
 
         ConnectyCube.chat.dialog.list(dialogId, (error: any, dialogs: any) => {
             if (dialogs) {
                 console.log("dialogs")
-                Reactotron.log(dialogs);
+                console.log(dialogs)
 
                 var dialog: any = []
 
@@ -136,14 +135,14 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                     var eachdialog = {
                         dialogid: item._id,
                         lastmsg: item.last_message,
-                        name: item.name,
-                        time: new Date(),  
-                        opponentId:item.occupants_ids[1],
-                        type:item.type,
+                        name: item.occupants_ids[0] == this.state.userid ? item.occupants_ids[1] : item.occupants_ids[0],
+                        time: new Date(),
+                        opponentId: item.occupants_ids[0] == this.state.userid ? item.occupants_ids[1] : item.occupants_ids[0],
+                        type: item.type,
                         Avast: "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
                     }
                     dialog.push(eachdialog);
-                    
+
                 })
 
                 this.setState({ dialogs: dialog })
@@ -169,22 +168,49 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
         })
             .then((response) => {
 
-                var dialog: any = [];
+                var dialog: any = []
+
                 response.data.forEach((item: any) => {
+
+
+                    var id = item.userAccounts[0].connectyCubeId == this.state.userid ? item.userAccounts[1]._id : item.userAccounts[0]._id;
+                    var img="";
+                    axios({
+                        method: 'GET',
+                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=USER_ACCOUNT&entity=" + id + "",
+                        headers: {
+                            'Authorization': data.Token
+                        }
+                    })
+                        .then((imgresponse) => {
+                            console.log(imgresponse);
+                            if (imgresponse.data.length > 0) {
+                                console.log(response.data[imgresponse.data.length - 1].fileUrl);
+                                img=imgresponse.data[imgresponse.data.length - 1].fileUrl;
+                            }
+                            else {
+                                // this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
+                                img="https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg";
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(error);
+                        });
+
+
+                    
                     var eachdialog = {
                         dialogid: item.connectyCubeId,
                         lastmsg: "",
-                        name: item.userAccounts[0].cognitoId==data.id?item.userAccounts[1].connectyCubeId:item.userAccounts[0].connectyCubeId,
-                        time: new Date(),  
-                        opponentId: item.userAccounts[0].cognitoId==data.id?item.userAccounts[1].connectyCubeId:item.userAccounts[0].connectyCubeId,
-                        type:2,
-                        Avast: "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
+                        name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                        time: new Date(),
+                        opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                        type: 2,
+                        Avast: img!=""&&img!=null?img:"https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
                     }
                     dialog.push(eachdialog);
-                    
-                })
-                Reactotron.log(dialog);
 
+                })
 
                 this.setState({ dialogs: dialog })
 
@@ -198,7 +224,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
     }
 
 
-    
+
 
 
     render() {
@@ -225,13 +251,13 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                             <Text style={styles.name}>John Doe showed interest in your profile</Text>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: width / 2 }}>
                                 <TouchableOpacity
-                                    onPress={() => { this.props.navigation.navigate('InvitedProfile',{id:"1",Name:"Hanzala"}) }}
+                                    onPress={() => { this.props.navigation.navigate('InvitedProfile', { id: "1", Name: "Hanzala" }) }}
                                     style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5 }]} activeOpacity={0.8}>
                                     <Text style={{
                                         color: '#000',
                                         fontWeight: 'bold',
                                         fontSize: 10
-                                    }}>{'Decline'}</Text>
+                                    }}>{'Profile'}</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => { }}
@@ -248,7 +274,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                     <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
                 </View>
 
-                <View style={styles.itemContainer}>
+                <View style={styles.itemContainer} >
                     <View style={styles.itemSubContainer}>
                         <View style={styles.photoContainer}>
                             <Image source={photo} style={styles.photo} />
@@ -257,7 +283,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                             </TouchableOpacity>
                         </View>
                         <View style={styles.descGroup}>
-                            <Text style={styles.name}>You have a new Activity Suggestion posted by Moris "Jungle Safari"</Text>
+                            <Text style={styles.name} onPress={() => { this.props.navigation.navigate('InvitedEventDetail', { eventid: "5d23a22a02c19cc6af6dd175", userId: "5d4b3ec6d755bd2cdd10c241" }) }}>You have a new Activity Suggestion posted by Moris "Jungle Safari"</Text>
                         </View>
                     </View>
                     <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
@@ -267,11 +293,11 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                 {this.state.dialogs.map((item, index) =>
 
                     <TouchableOpacity activeOpacity={0.8}
-                        onPress={() => { this.props.navigation.navigate('ChatBox',{dialogid:item.dialogid,opponentId:item.opponentId,type:item.type,name:item.name}) }}
+                        onPress={() => { this.props.navigation.navigate('ChatBox', { dialoagid: item.dialogid, opponentId: item.opponentId, type: item.type, name: item.name }) }}
                         style={styles.itemContainer}>
                         <View style={styles.itemSubContainer}>
                             <View style={styles.photoContainer}>
-                                <Image source={{uri:item.Avast}} style={styles.photo} />
+                                <Image source={{ uri: item.Avast }} style={styles.photo} />
                             </View>
                             <View style={styles.descGroup}>
                                 <Text style={styles.name}>{item.name}</Text>
