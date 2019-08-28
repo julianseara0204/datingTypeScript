@@ -118,8 +118,6 @@ android {
     }
 
 
-
-
     buildTypes {
         release {
             minifyEnabled enableProguardInReleaseBuilds
