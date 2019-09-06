@@ -7,6 +7,7 @@ import styles from "./styles";
 const home_footer = require("../../../../assets/home_footer.png");
 const message_footer = require("../../../../assets/message_footer.png");
 const profile_footer = require("../../../../assets/profile_footer.png");
+const message_notification = require('../../../../assets/message_notification.png');
 
 type ComponentProps = {
     setPage: any
@@ -50,7 +51,15 @@ class HomeFooter extends Component<ComponentProps, ComponentState> {
                         this.props.setPage(2);
                     }}
                     activeOpacity={0.8}>
-                    <Image source={profile_footer} style={[styles.footerImg, this.state.index == 2 ? { tintColor: 'rgb(158, 149, 254)' } : { tintColor: 'black' }]} />
+                    <Image source={message_notification} style={[styles.footerImg, this.state.index == 2 ? { tintColor: 'rgb(158, 149, 254)' } : { tintColor: 'black' }]} />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ alignItems: 'center' }}
+                    onPress={() => {
+                        this.setState({ index: 3 });
+                        this.props.setPage(3);
+                    }}
+                    activeOpacity={0.8}>
+                    <Image source={profile_footer} style={[styles.footerImg, this.state.index == 3 ? { tintColor: 'rgb(158, 149, 254)' } : { tintColor: 'black' }]} />
                 </TouchableOpacity>
             </View>
         );

@@ -28,6 +28,7 @@ type ComponentState = {
     userid: number,
     pid: number,
     dialogs: dialog[],
+    eventdata: any,
 }
 
 type dialog = {
@@ -54,6 +55,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
             userid: 1,
             pid: 0,
             dialogs: [],
+            eventdata: [],
             routes: [
 
             ],
@@ -80,7 +82,6 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
 
     login = () => {
-        // var userCredential = { login: 'Hanzala', password: 'Hanzala123' };
         var userCredential = { login: data.id, password: data.id };
 
         ConnectyCube.login(userCredential, (error: any, user: any) => {
@@ -88,7 +89,6 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                 console.log("user")
                 console.log(user)
                 this.setState({ userid: user.id })
-                // this.getdialog();
                 this.like();
             } else {
                 console.log("user error")
@@ -101,7 +101,6 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
 
     connectchat = () => {
-        // var userCredentials = {userId: 159714,password: 'Hassan123'};
         var userCredentials = { userId: this.state.userid, password: data.id };
 
         ConnectyCube.chat.connect(
@@ -145,9 +144,8 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
                 })
 
-                this.setState({ dialogs: dialog })
-
-                console.log(this.state.dialogs)
+                this.setState({ dialogs: dialog });
+                console.log(this.state.dialogs);
 
             } else {
                 console.log("dialogs error")
@@ -156,6 +154,31 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
         });
     }
 
+
+    getname = (id: string, type: string): any => {
+        axios({
+            method: 'GET',
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
+                console.log("User Picure", response);
+                if (response.data.length > 0) {
+                    return response.data[response.data.length - 1].fileUrl;
+                }
+                else {
+                    return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+                }
+
+            })
+            .catch((error) => {
+                console.log(error);
+                return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+
+            });
+    }
 
 
     like = () => {
@@ -168,13 +191,14 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
         })
             .then((response) => {
 
-                var dialog: any = []
 
                 response.data.forEach((item: any) => {
 
 
+                    var dialog: any = this.state.dialogs;
                     var id = item.userAccounts[0].connectyCubeId == this.state.userid ? item.userAccounts[1]._id : item.userAccounts[0]._id;
-                    var img="";
+                    var img = "";
+
                     axios({
                         method: 'GET',
                         url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=USER_ACCOUNT&entity=" + id + "",
@@ -186,33 +210,43 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                             console.log(imgresponse);
                             if (imgresponse.data.length > 0) {
                                 console.log(response.data[imgresponse.data.length - 1].fileUrl);
-                                img=imgresponse.data[imgresponse.data.length - 1].fileUrl;
+                                img = imgresponse.data[imgresponse.data.length - 1].fileUrl;
+
+                                dialog.push({
+                                    dialogid: item.connectyCubeId,
+                                    lastmsg: "",
+                                    name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                                    time: new Date(),
+                                    opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                                    type: 2,
+                                    Avast: imgresponse.data[imgresponse.data.length - 1].fileUrl,
+                                });
+
+                                this.setState({ dialogs: this.state.dialogs });
                             }
                             else {
                                 // this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
-                                img="https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg";
+
+                                dialog.push({
+                                    dialogid: item.connectyCubeId,
+                                    lastmsg: "",
+                                    name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                                    time: new Date(),
+                                    opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                                    type: 2,
+                                    Avast: "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
+                                });
+                                
+                                this.setState({ dialogs: this.state.dialogs });
+                                // img = "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg";
                             }
                         })
                         .catch((error) => {
                             console.log(error);
                         });
 
-
-                    
-                    var eachdialog = {
-                        dialogid: item.connectyCubeId,
-                        lastmsg: "",
-                        name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                        time: new Date(),
-                        opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                        type: 2,
-                        Avast: img!=""&&img!=null?img:"https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
-                    }
-                    dialog.push(eachdialog);
-
                 })
 
-                this.setState({ dialogs: dialog })
 
                 console.log(this.state.dialogs)
 
@@ -228,6 +262,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
 
     render() {
+        console.log("INNN")
         return (
             <Content>
                 <View style={{ flexDirection: 'row', width: width, padding: 20, justifyContent: 'space-between' }}>
@@ -239,60 +274,8 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                 </View>
 
 
-                <View style={styles.itemContainer}>
-                    <View style={styles.itemSubContainer}>
-                        <View style={styles.photoContainer}>
-                            <Image source={photo} style={styles.photo} />
-                            <TouchableOpacity activeOpacity={0.8} style={styles.tipContainer}>
-                                <Image source={message_heart} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.descGroup}>
-                            <Text style={styles.name}>John Doe showed interest in your profile</Text>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: width / 2 }}>
-                                <TouchableOpacity
-                                    onPress={() => { this.props.navigation.navigate('InvitedProfile', { id: "1", Name: "Hanzala" }) }}
-                                    style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5 }]} activeOpacity={0.8}>
-                                    <Text style={{
-                                        color: '#000',
-                                        fontWeight: 'bold',
-                                        fontSize: 10
-                                    }}>{'Profile'}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => { }}
-                                    style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5, backgroundColor: 'rgb(158, 149, 254)' }]} activeOpacity={0.8}>
-                                    <Text style={{
-                                        color: '#000',
-                                        fontWeight: 'bold',
-                                        fontSize: 10
-                                    }}>{'Message'}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                    <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
-                </View>
-
-                <View style={styles.itemContainer} >
-                    <View style={styles.itemSubContainer}>
-                        <View style={styles.photoContainer}>
-                            <Image source={photo} style={styles.photo} />
-                            <TouchableOpacity activeOpacity={0.8} style={styles.tipContainer}>
-                                <Image source={message_notification} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.descGroup}>
-                            <Text style={styles.name} onPress={() => { this.props.navigation.navigate('InvitedEventDetail', { eventid: "5d23a22a02c19cc6af6dd175", userId: "5d4b3ec6d755bd2cdd10c241" }) }}>You have a new Activity Suggestion posted by Moris "Jungle Safari"</Text>
-                        </View>
-                    </View>
-                    <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
-                </View>
-
-
                 {this.state.dialogs.map((item, index) =>
-
-                    <TouchableOpacity activeOpacity={0.8}
+                    <TouchableOpacity key={index} activeOpacity={0.8}
                         onPress={() => { this.props.navigation.navigate('ChatBox', { dialoagid: item.dialogid, opponentId: item.opponentId, type: item.type, name: item.name }) }}
                         style={styles.itemContainer}>
                         <View style={styles.itemSubContainer}>

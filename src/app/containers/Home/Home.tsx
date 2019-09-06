@@ -7,6 +7,7 @@ import _ from "lodash";
 import HomeFooter from './HomeFooter';
 import PopupSendLike from './PopupSendLike';
 import Dashboard from './Dashboard';
+import Notification from './Notification';
 import DashboardMessage from './DashboardMessage';
 import MyProfile from './MyProfile';
 const { width } = Dimensions.get('window');
@@ -52,6 +53,7 @@ export class Home extends Component<NavigationScreenProps, ComponentState> {
                 {this.state.index == 0 ?
                     <Dashboard navigation={this.props.navigation} /> :
                     this.state.index == 1 ? <DashboardMessage navigation={this.props.navigation} /> :
+                    this.state.index == 2 ? <Notification navigation={this.props.navigation} /> :
                         <MyProfile navigation={this.props.navigation} />}
 
                 <HomeFooter setPage={this.setPage} {...this.props} />

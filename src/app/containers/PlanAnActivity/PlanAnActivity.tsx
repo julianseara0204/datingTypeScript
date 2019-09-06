@@ -13,7 +13,6 @@ import ImagePicker from 'react-native-image-picker';
 import { data, datapost } from '../onboarding/data';
 import axios from "axios";
 import { thisTypeAnnotation } from "@babel/types";
-
 // Images
 const cross = require('../../../assets/card_cross.png');
 const bike_riding = require('../../../assets/bike_riding.png');
@@ -51,7 +50,8 @@ type ComponentState = {
     filereqdata: filereq,
     avatarSource: picget,
     Picdata: picdata
-
+    imguri:string,
+    imgname:string,
 }
 
 type filereq = {
@@ -103,6 +103,8 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             isDateTimePickerVisible: false,
             selectedInput: 'startDate',
             selectDateTime: 'date',
+            imguri:"",
+            imgname:"",
             avatarSource: { uri: "https://unpkg.com/react-native-image-crop-picker@0.21.1/svg.svg" },
             Picdata: {
                 data: "string",
@@ -170,13 +172,20 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
         })
             .then((response) => {
                 console.log(response);
+                this.setState({filereqdata:{
+                    "entityType": "ACTIVITY",
+                    "name": response.data._id+".jpg",
+                    "type": "image/jpeg",
+                    "entity": response.data._id
+                }});
+                this.putbtn();
             })
             .catch((error) => {
                 console.log(error);
             });
     }
 
-    putbtn = (uri: string, fileName: any, type: any) => {
+    putbtn = () => {
 
         axios({
             method: 'POST',
@@ -186,41 +195,44 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 'Authorization': data.Token,
             }
         })
-            .then((response) => {
+            .then((response1) => {
 
-                console.log(response.data.fileUploadUrl);
+                console.log(response1.data.fileUploadUrl);
 
-                const form_data = new FormData();
-                form_data.append("image", {
-                    uri: uri,
-                    name: fileName,
-                });
-                axios({
-                    method: 'PUT',
-                    url: response.data.fileUploadUrl,
-                    data: form_data,
-                    headers: {
-                        'Content-Type': type
-                    }
-                })
-                    .then((response) => {
-                        console.log(response);
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
+
+                var file = {
+                    uri: this.state.imguri,
+                    type: 'image/jpeg',
+                    name: this.state.imgname,
+                  };
+                  
+                  const xhr = new XMLHttpRequest();
+                  var body = new FormData();
+                  body.append('file', file);
+                  xhr.open('PUT', response1.data.fileUploadUrl);
+                  xhr.onreadystatechange = () => {
+                    if(xhr.readyState === 4){
+                      if(xhr.status === 200){
+                        console.log('Posted!');
+                      }
+                      else{
+                        console.log('Could not upload file.');
+                     }
+                   }
+                };
+
+                  xhr.setRequestHeader('Content-Type', 'image/jpeg')
+
+                  xhr.send(file);
 
 
             })
             .catch((error) => {
                 console.log(error);
             });
-
-
-
-
     }
 
+    
     selectPhotoTapped = () => {
         const options = {
             quality: 1.0,
@@ -242,54 +254,12 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response.uri };
-                // this.putbtn(response.uri,response.fileName,response.type)
+   
 
-                axios({
-                    method: 'POST',
-                    url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
-                    data: this.state.filereqdata,
-                    headers: {
-                        'Authorization': data.Token,
-                    }
-                })
-                    .then((response1) => {
+                this.setState({imguri : response.uri});
 
-                        console.log(response1.data.fileUploadUrl);
+             
 
-
-
-                        const form_data = new FormData();
-                        form_data.append("image", {
-                            uri: response.uri,
-                            name: response.fileName,
-                        });
-
-
-
-
-                        axios({
-                            method: 'PUT',
-                            url: response1.data.fileUploadUrl,
-                            data: response.data,
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                            .then((response2) => {
-                                console.log(response2);
-                            })
-                            .catch((error) => {
-                                console.log(error);
-                            });
-
-
-                    })
-                    .catch((error) => {
-                        console.log(error);
-                    });
-
-                // You can also display the image using data:
-                // let source = { uri: 'data:image/jpeg;base64,' + response.data };
                 this.setState({ avatarSource: source });
             }
         });

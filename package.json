@@ -14,6 +14,7 @@
     "aws-amplify": "^1.1.28",
     "aws-amplify-react-native": "^2.1.12",
     "axios": "^0.19.0",
+    "buffer": "^5.4.2",
     "connectycube-reactnative": "^1.7.0",
     "date-fns": "^1.30.1",
     "global": "^4.4.0",
@@ -46,6 +47,7 @@
     "react-native-toaster": "^1.2.2",
     "react-native-wheel-picker": "^1.2.0",
     "react-navigation": "^2.14.2",
+    "rn-fetch-blob": "^0.10.11",
     "toggle-switch-react-native": "^2.0.2"
   },
   "devDependencies": {

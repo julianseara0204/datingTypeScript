@@ -1,0 +1,4 @@
+#Fri Sep 06 04:42:04 PDT 2019
+base.0=C\:\\Users\\Hanzala\\Desktop\\3 files\\app1\\datingtypescript\\android\\app\\build\\intermediates\\transforms\\dexMerger\\debug\\0
+renamed.0=classes.dex
+path.0=classes.dex

@@ -23,6 +23,7 @@ import InvitedEventDetail from "../containers/InvitedEventDetail";
 import OBTabScreen from "../containers/onboarding/OBTabScreen";
 import { string } from "prop-types";
 import msg from "../containers/Home/DashboardMessage/DashboardMessage";
+import Notification from "../containers/Home/Notification/Notification";
 import Dashboard from "../containers/Home/Dashboard/Dashboard";
 
     
@@ -58,6 +59,7 @@ const RootSwitch = createStackNavigator(
         InvitedEventDetail,
         msg,
         Dashboard,
+        Notification
     },
     { headerMode: 'none' });
 

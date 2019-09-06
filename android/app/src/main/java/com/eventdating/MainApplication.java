@@ -3,8 +3,8 @@ package com.eventdating;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+
 import com.imagepicker.ImagePickerPackage;
-// import com.airbnb.android.react.maps.MapsPackage;
 import com.amazonaws.RNAWSCognitoPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import com.zyu.ReactNativeWheelPickerPackage;

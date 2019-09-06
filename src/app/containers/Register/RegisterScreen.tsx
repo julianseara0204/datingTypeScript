@@ -195,12 +195,18 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
         ]).then((result: any) => {
                 console.log("result", result);
 
+                // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+                //     IdentityPoolId: 'IDENTITY_POOL_ID',
+                //     Logins: {
+                //       'graph.facebook.com': result.authResponse.accessToken
+                //     }
+                //   });
+
                 if (result.isCancelled) {
                     // alert("Login cancelled");
                 } else {
                     AccessToken.getCurrentAccessToken().then((data: any) => {
                         console.log("data", data);
-
                         this.addFbUser(data);
                     });
                 }

@@ -8,6 +8,7 @@ import { data, datapost } from '../../onboarding/data';
 import axios from "axios";
 
 import { format } from 'date-fns';
+import ImagePicker from 'react-native-image-picker';
 
 const { width } = Dimensions.get('window');
 
@@ -33,7 +34,8 @@ type ComponentState = {
     userPrivilege: string,
     activitymap: arr[],    
     filereqdata:filereq,
-    picture:string
+    picture:string,
+    id:string,
 }
 
 type arr = {
@@ -71,8 +73,9 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
         this.state = {
             activitymap: [],
             picture:"",
-            userEmail: "example@mail.com",
-            userName: "ALISA CRAIG",
+            userEmail: "",
+            userName: "",
+            id:"",
             userPrivilege: "Privilege Membership",
             filereqdata:	{
                 "entityType": "ACTIVITY",
@@ -131,6 +134,7 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
             .then((response) => {
 
                 console.log(response.data.userAccount._id);
+                this.setState({id:response.data.userAccount._id})
                 this.getuserimage(response.data.userAccount._id,"USER_ACCOUNT")
                 response.data.profileEntries.forEach((arrss: arritem) => {
                     if(arrss.entryType==="NAME")
@@ -180,7 +184,12 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
         axios({
             method: 'POST',
             url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
-            data: this.state.filereqdata,
+            data: {
+                "entityType": "USER_ACCOUNT",
+                "name": this.state.id+".jpg",
+                "entity": this.state.id,
+                "type": "image/png/Jpeg"
+              },
             headers: {
                 'Authorization': data.Token,
             }
@@ -212,6 +221,90 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
 
 
     }
+
+
+    
+    
+    selectPhotoTapped = () => {
+        const options = {
+            quality: 1.0,
+            maxWidth: 500,
+            maxHeight: 500,
+            storageOptions: {
+                skipBackup: true,
+            },
+        };
+
+        ImagePicker.showImagePicker(options, response => {
+            console.log('Response = ', response);
+
+            if (response.didCancel) {
+                console.log('User cancelled photo picker');
+            } else if (response.error) {
+                console.log('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+                console.log('User tapped custom button: ', response.customButton);
+            } else {
+                const source = { uri: response.uri };
+   
+
+                
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/requestUpload',
+            data: {
+                "entityType": "USER_ACCOUNT",
+                "name": this.state.id+".jpg",
+                "entity": this.state.id,
+                "type": "image/png/Jpeg"
+              },
+            headers: {
+                'Authorization': data.Token,
+            }
+        })
+            .then((response1) => {
+
+                console.log(response1.data.fileUploadUrl);
+
+
+                var file = {
+                    uri: response.uri,
+                    type: 'image/jpeg',
+                    name: this.state.id+".jpg",
+                  };
+                  
+                  const xhr = new XMLHttpRequest();
+                  var body = new FormData();
+                  body.append('file', file);
+                  xhr.open('PUT', response1.data.fileUploadUrl);
+                  xhr.onreadystatechange = () => {
+                    if(xhr.readyState === 4){
+                      if(xhr.status === 200){
+                        console.log('Posted!');
+                      }
+                      else{
+                        console.log('Could not upload file.');
+                     }
+                   }
+                };
+
+                  xhr.setRequestHeader('Content-Type', 'image/jpeg')
+
+                  xhr.send(file);
+
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+             
+
+                this.setState({ picture: response.uri });
+            }
+        });
+    }
+
 
     logout = () => {
         AsyncStorage.clear(); this.props.navigation.navigate('LoginScreen');
