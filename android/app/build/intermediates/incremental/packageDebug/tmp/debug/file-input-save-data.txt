@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Fri Sep 06 04:42:12 PDT 2019
+#Mon Sep 16 07:17:05 PDT 2019
 33.base=C\:\\Users\\Hanzala\\Desktop\\3 files\\app1\\datingtypescript\\android\\app\\build\\intermediates\\transforms\\mergeJniLibs\\debug\\0
 47.base=C\:\\Users\\Hanzala\\Desktop\\3 files\\app1\\datingtypescript\\android\\app\\build\\intermediates\\transforms\\mergeJniLibs\\debug\\0
 50.base=C\:\\Users\\Hanzala\\Desktop\\3 files\\app1\\datingtypescript\\android\\app\\build\\intermediates\\merged_assets\\debug\\mergeDebugAssets\\out

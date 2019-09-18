@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Dimensions, Image, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Image, Text, TouchableOpacity, View, Alert } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Content } from "native-base";
 import { Route } from "../../../models/models"
@@ -12,6 +12,7 @@ const ConnectyCube = require('connectycube-reactnative');
 import { data, datapost } from '../../onboarding/data';
 import axios from "axios";
 import { format } from 'date-fns';
+import { toString } from "../../../../../types/lodash";
 
 // Images
 const message_heart = require('../../../../assets/message_heart.png');
@@ -159,7 +160,9 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
         });
     }
 
-    getnotification = () => {
+    getnotification() {
+
+        // var s=await this.getimg(parse.event._id, "EVENT");
         axios({
             method: 'GET',
             url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/notifications",
@@ -170,62 +173,22 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
             .then((response) => {
                 console.log("notification", response);
                 const alldata: any = [];
-                response.data.forEach((item: any) => {
+                response.data.forEach(async (item: any) => {
                     var parse = JSON.parse(item.data);
                     console.log("parse notification", parse);
 
-                    // if (parse.event != null) {
-                    //     alldata.push({
-                    //         Picture:  this.getname(parse.event._id,"EVENT"),
-                    //         name: "",
-                    //         eventname: parse.event.eventName,
-                    //         eventid: parse.event._id,
-                    //         user_id: parse.invitedByAccount._id,
+                    const cc = (item.notificationType == "ACTIVITY_INVITE") ? await this.getimg(parse.event._id, "EVENT") : await this.getimg(parse.otherAccount._id, "USER_ACCOUNT");
 
-                    //     });
-                    // }
+                    const cname = (item.notificationType == "ACTIVITY_INVITE") ? await this.getname(parse.invitedByAccount._id) : await this.getname(parse.otherAccount._id);
 
-                    axios({
-                        method: 'GET',
-                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=EVENT&entity=" + parse.event._id + "",
-                        headers: {
-                            'Authorization': data.Token
-                        }
-                    })
-                        .then((response) => {
-                            console.log("User Picure", response);
-                            if (response.data.length > 0) {
-                                if (parse.event != null) {
-                                    alldata.push({
-                                        Picture: response.data[response.data.length - 1].fileUrl,
-                                        name: "",
-                                        eventname: parse.event.eventName,
-                                        eventid: parse.event._id,
-                                        user_id: parse.invitedByAccount._id,
-
-                                    });
-                                }
-                                // return response.data[response.data.length - 1].fileUrl;
-                            }
-                            else {
-                                if (parse.event != null) {
-                                    alldata.push({
-                                        Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png',
-                                        name: "",
-                                        eventname: parse.event.eventName,
-                                        eventid: parse.event._id,
-                                        user_id: parse.invitedByAccount._id,
-                                    });
-                                }
-                            }
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                            return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
-
-                        });
-
-
+                    alldata.push({
+                        Picture: cc,
+                        name: cname,
+                        eventname: (item.notificationType == "ACTIVITY_INVITE") ? parse.event.eventName : "",
+                        eventid: (item.notificationType == "ACTIVITY_INVITE") ? parse.event._id : parse.userAccount._id,
+                        user_id: (item.notificationType == "ACTIVITY_INVITE") ? parse.invitedByAccount._id : parse.otherAccount._id,
+                        type: item.notificationType
+                    });
 
                 })
 
@@ -236,35 +199,104 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
             .catch((error) => {
                 console.log(error);
             });
-
     }
 
- 
 
-    getname=(id: string, type: string): any => {
-        axios({
-            method: 'GET',
-            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
-            headers: {
-                'Authorization': data.Token
-            }
-        })
-            .then((response) => {
+
+
+
+    getname(id: any) {
+
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/users?user=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            })
+                .then((response) => {
+                    var name = "";
+                    console.log("User Picure", response);
+                    response.data.profileEntries.forEach((arrss: any) => {
+                        if (arrss.entryType === "NAME") {
+                            name = arrss.value;
+                        }
+                    });
+
+                    resolve(name);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    // return error;
+                    resolve(error);
+                });
+        });
+    }
+
+    getimg(id: string, type: string): Promise<any> {
+
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            }).then((response) => {
                 console.log("User Picure", response);
                 if (response.data.length > 0) {
-                    return response.data[response.data.length - 1].fileUrl;
+                    resolve(response.data[response.data.length - 1].fileUrl);
                 }
                 else {
-                     return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+                    resolve('https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png');
                 }
 
             })
-            .catch((error) => {
-                console.log(error);
-                return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+                .catch((error) => {
+                    console.log(error);
+                    resolve('https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png');
 
-            });
+                });
+        });
     }
+
+    async msg(id: string) {
+        var dialog = await this.createchat(id);
+        var name = await this.getname(id);
+        if (dialog != '') {
+            this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: item.opponentId, type: 2, name: name })
+        }
+    }
+
+
+
+    createchat(id: string){
+
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat",
+                data: {
+                    "otherAccount": id
+                },
+                headers: {
+                    'Authorization': data.Token
+                }
+            }).then(async(response) => {
+                var dialog = response.data.connectyCubeId;
+                var name = await this.getname(id);
+                var opid=response.data.userAccounts[0].cognitoId == data.id ? response.data.userAccounts[1].connectyCubeId : response.data.userAccounts[0].connectyCubeId;
+                if (dialog != '') {
+                    this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+                }
+            })
+                .catch((error) => {
+
+                });
+        });
+    }
+
+
 
 
     like = () => {
@@ -280,8 +312,6 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                 var dialog: any = []
 
                 response.data.forEach((item: any) => {
-
-
                     var id = item.userAccounts[0].connectyCubeId == this.state.userid ? item.userAccounts[1]._id : item.userAccounts[0]._id;
                     var img = "";
                     axios({
@@ -348,42 +378,7 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                 </View>
 
 
-                <View style={styles.itemContainer}>
-                    <View style={styles.itemSubContainer}>
-                        <View style={styles.photoContainer}>
-                            <Image source={photo} style={styles.photo} />
-                            <TouchableOpacity activeOpacity={0.8} style={styles.tipContainer}>
-                                <Image source={message_heart} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                            </TouchableOpacity>
-                        </View>
-                        <View style={styles.descGroup}>
-                            <Text style={styles.name}>John Doe showed interest in your profile</Text>
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: width / 2 }}>
-                                <TouchableOpacity
-                                    onPress={() => { this.props.navigation.navigate('InvitedProfile', { id: "1", Name: "Hanzala" }) }}
-                                    style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5 }]} activeOpacity={0.8}>
-                                    <Text style={{
-                                        color: '#000',
-                                        fontWeight: 'bold',
-                                        fontSize: 10
-                                    }}>{'Profile'}</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    onPress={() => { }}
-                                    style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5, backgroundColor: 'rgb(158, 149, 254)' }]} activeOpacity={0.8}>
-                                    <Text style={{
-                                        color: '#000',
-                                        fontWeight: 'bold',
-                                        fontSize: 10
-                                    }}>{'Message'}</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-                    </View>
-                    <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
-                </View>
-
-                {this.state.eventdata.map((item: any, index: any) =>
+                {this.state.eventdata.map((item: any, index: any) => (item.type == "ACTIVITY_INVITE") ?
                     <View style={styles.itemContainer} key={index} >
                         <View style={styles.itemSubContainer}>
                             <View style={styles.photoContainer}>
@@ -398,6 +393,46 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                         </View>
                         <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
                     </View>
+                    :
+
+
+
+                    <View style={styles.itemContainer}>
+                        <View style={styles.itemSubContainer}>
+                            <View style={styles.photoContainer}>
+                                <Image source={{ uri: item.Picture }} style={styles.photo} />
+                                <TouchableOpacity activeOpacity={0.8} style={styles.tipContainer}>
+                                    <Image source={message_heart} style={[styles.smallIcon, { tintColor: 'white' }]} />
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.descGroup}>
+                                <Text style={styles.name}>{item.name} showed interest in your profile</Text>
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: width / 2 }}>
+                                    <TouchableOpacity
+                                        onPress={() => { this.props.navigation.navigate('InvitedProfile', { id: item.user_id, Name: item.name }) }}
+                                        style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5 }]} activeOpacity={0.8}>
+                                        <Text style={{
+                                            color: '#000',
+                                            fontWeight: 'bold',
+                                            fontSize: 10
+                                        }}>{'Profile'}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => { }}
+                                        style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5, backgroundColor: 'rgb(158, 149, 254)' }]} activeOpacity={0.8}>
+                                        <Text style={{
+                                            color: '#000',
+                                            fontWeight: 'bold',
+                                            fontSize: 10
+                                        }}>{'Message'}</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        </View>
+                        <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>11:48</Text>
+                    </View>
+
+
                 )}
 
 

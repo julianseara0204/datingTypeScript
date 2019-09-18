@@ -155,29 +155,31 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
     }
 
 
-    getname = (id: string, type: string): any => {
-        axios({
-            method: 'GET',
-            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
-            headers: {
-                'Authorization': data.Token
-            }
-        })
-            .then((response) => {
+    getimg(id: string, type: string): Promise<any> {
+
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            }).then((response) => {
                 console.log("User Picure", response);
                 if (response.data.length > 0) {
-                    return response.data[response.data.length - 1].fileUrl;
+                    resolve(response.data[response.data.length - 1].fileUrl);
                 }
                 else {
-                    return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+                    resolve('https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png');
                 }
 
             })
-            .catch((error) => {
-                console.log(error);
-                return 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png';
+                .catch((error) => {
+                    console.log(error);
+                    resolve('https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png');
 
-            });
+                });
+        });
     }
 
 
@@ -192,58 +194,23 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
             .then((response) => {
 
 
-                response.data.forEach((item: any) => {
+                response.data.forEach(async(item: any) => {
 
 
                     var dialog: any = this.state.dialogs;
                     var id = item.userAccounts[0].connectyCubeId == this.state.userid ? item.userAccounts[1]._id : item.userAccounts[0]._id;
-                    var img = "";
+                  
+                    dialog.push({
+                        dialogid: item.connectyCubeId,
+                        lastmsg: "",
+                        name:  await this.getname(id),
+                        time: new Date(),
+                        opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
+                        type: 2,
+                        Avast: await this.getimg(id, "USER_ACCOUNT"),
+                    });
 
-                    axios({
-                        method: 'GET',
-                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=USER_ACCOUNT&entity=" + id + "",
-                        headers: {
-                            'Authorization': data.Token
-                        }
-                    })
-                        .then((imgresponse) => {
-                            console.log(imgresponse);
-                            if (imgresponse.data.length > 0) {
-                                console.log(response.data[imgresponse.data.length - 1].fileUrl);
-                                img = imgresponse.data[imgresponse.data.length - 1].fileUrl;
 
-                                dialog.push({
-                                    dialogid: item.connectyCubeId,
-                                    lastmsg: "",
-                                    name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                                    time: new Date(),
-                                    opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                                    type: 2,
-                                    Avast: imgresponse.data[imgresponse.data.length - 1].fileUrl,
-                                });
-
-                                this.setState({ dialogs: this.state.dialogs });
-                            }
-                            else {
-                                // this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
-
-                                dialog.push({
-                                    dialogid: item.connectyCubeId,
-                                    lastmsg: "",
-                                    name: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                                    time: new Date(),
-                                    opponentId: item.userAccounts[0].cognitoId == data.id ? item.userAccounts[1].connectyCubeId : item.userAccounts[0].connectyCubeId,
-                                    type: 2,
-                                    Avast: "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg"
-                                });
-                                
-                                this.setState({ dialogs: this.state.dialogs });
-                                // img = "https://i.pinimg.com/originals/97/02/2f/97022fd71f8414d07660105f51c86999.jpg";
-                            }
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
 
                 })
 
@@ -259,10 +226,39 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
 
 
 
+    getname(id: any) {
+
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/users?user=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            })
+                .then((response) => {
+                    var name = "";
+                    console.log("User Picure", response);
+                    response.data.profileEntries.forEach((arrss: any) => {
+                        if (arrss.entryType === "NAME") {
+                            name = arrss.value;
+                        }
+                    });
+
+                    resolve(name);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    // return error;
+                    resolve(error);
+                });
+        });
+    }
+
+
 
 
     render() {
-        console.log("INNN")
         return (
             <Content>
                 <View style={{ flexDirection: 'row', width: width, padding: 20, justifyContent: 'space-between' }}>
