@@ -11,6 +11,7 @@ import SmokeScreen from '../SmokeScreen';
 import EducationScreen from '../EducationScreen';
 import HeightScreen from '../Height';
 import QuestionScreen from '../QuestionScreen';
+import InformationScreen from '../InformationScreen';
 import { Container, Content } from "native-base";
 import { Router, TabbarMenuItem } from "../../../models/models";
 const { width, height } = Dimensions.get('window');
@@ -26,6 +27,7 @@ const cheers = require('../../../../assets/cheers.png');
 const smoke = require('../../../../assets/smoke.png');
 const education = require('../../../../assets/education.png');
 const question = require('../../../../assets/question.png');
+const information = require('../../../../assets/portfolio.png');
 
 type ComponentProps = {
     navigation: NavigationScreenProps
@@ -53,6 +55,7 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                 { title: 'Sample 5', type: 500 },
                 { title: 'Sample 6', type: 600 },
                 { title: 'Sample 7', type: 700 },
+                { title: 'Sample 8', type: 800 },
             
             ],
             tabbarMenu: [
@@ -94,10 +97,16 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                 },
                 {
                     id: 700,
-                    label: "Question",
+                    label: "Information",
                     img: question,
             
                 },
+                // {
+                //     id: 800,
+                //     label: "Information",
+                //     img: information,
+            
+                // },
             ]
         };
     }
@@ -133,8 +142,12 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
                     <EducationScreen />
                 }
                 {item.type == 700 &&
-                    <QuestionScreen enableParentSnap={this.enableParentSnap} />
+                 <InformationScreen />
+                    // <QuestionScreen enableParentSnap={this.enableParentSnap} />
                 }
+                {/* {item.type == 800 &&
+                   
+                } */}
             </View>);
     }
     enableParentSnap = (flag: any) => {
@@ -160,7 +173,7 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
     dataput=()=>{
 
         console.log(data.Token);
-        console.log(datapost);
+        // console.log(datapost);
         axios({
             method: 'PUT',
             url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
@@ -169,8 +182,8 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
             'Authorization': data.Token}
         })
         .then ((response)=> {
-           this.connectycubeaccount();
-            console.log(response);          
+        //    this.connectycubeaccount();
+            console.log("Edit response",response);          
         })
         .catch(function (error) {
             console.log(error);

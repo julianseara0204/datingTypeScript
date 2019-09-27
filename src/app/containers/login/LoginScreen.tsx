@@ -6,6 +6,9 @@ import { NavigationScreenProps } from "react-navigation";
 import { Container, Content } from "native-base"
 import { Button } from 'react-native-elements';
 
+const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+
+const CognitoUser  = require('amazon-cognito-identity-js').CognitoUser;
 import { data ,datapost} from '../onboarding/data'
 
 // import Auth from '@aws-amplify/auth';
@@ -20,9 +23,12 @@ const { width, height } = Dimensions.get('window');
 class LoginScreen extends Component<NavigationScreenProps> {
 
 
+    componentWillMount(){
+         this.retrieveData();  
+    }
     constructor(props: any) {
         super(props);
-        // this.retrieveData();
+        // this.retrieveData();  
     }
 
     state = {
@@ -34,8 +40,8 @@ class LoginScreen extends Component<NavigationScreenProps> {
         facebookuserID: undefined,
         facebookLogin: false,
         error: null,
-        username: '+923452942130',
-        password: 'An@s12345',
+        username: '',
+        password: '',
         loading:false,
         user: null,
         login:null,
@@ -56,18 +62,43 @@ class LoginScreen extends Component<NavigationScreenProps> {
 
     retrieveData = async () => {
         try {
-          const value = await AsyncStorage.getItem('IsLogin');
-          if (value !== null) {          
-            data.Token  = value;
-            this.props.navigation.navigate('Home');
+          const value = await AsyncStorage.getItem('refreshToken');
+          const id:any = await AsyncStorage.getItem('id');
+          if (value !== null) { 
+            console.log("AsyncStorage")
+              console.log(value,id)
+            data.id=id;
+            this.getrefresh(value);
           }
-        } catch (error) {
-          // Error retrieving data
+        } catch (error) {          
+            this.props.navigation.navigate('LoginScreen');
         }
       };
 
 
 
+      async getrefresh(refreshToken:any){
+        try {
+            const cognitoUser = await Auth.currentAuthenticatedUser();
+            const currentSession:any = await Auth.currentSession();
+            console.log('cognitoUser',  cognitoUser);
+            data.Token=cognitoUser.signInUserSession.idToken.jwtToken;                
+            data.RefreshToken=cognitoUser.signInUserSession.refreshToken.token;
+            data.id=cognitoUser.attributes.sub; 
+            data.username=cognitoUser.attributes.name;                   
+            this.props.navigation.navigate('Home');
+            // cognitoUser.refreshSession(currentSession.refreshToken, (err:any, session:any) => {
+            //     console.log('session',  session);
+            //     const { idToken, refreshToken, accessToken } = session;
+            //     data.Token=idToken;                
+            //     data.RefreshToken=refreshToken;                
+            //     this.props.navigation.navigate('Home');
+            // });
+        } catch (e) {
+            console.log('Unable to refresh Token', e);            
+            this.props.navigation.navigate('LoginScreen');
+        }
+    }
 
     async signin() {
         const { username, password } = this.state
@@ -76,11 +107,12 @@ class LoginScreen extends Component<NavigationScreenProps> {
         this.setState({loading : true});
 
         await Auth.signIn({ "username": username, "password": password })
-            .then(user => {
+            .then(async (user) => {
                 console.log('Signin in: ', user  );                
-                console.log(user.signInUserSession.idToken.jwtToken);
+                // console.log(user.signInUserSession.idToken.jwtToken);
                 this.state.token=user.signInUserSession.idToken.jwtToken;
-                data.Token=user.signInUserSession.idToken.jwtToken;
+                data.Token=user.signInUserSession.idToken.jwtToken;                
+                data.RefreshToken=user.signInUserSession.refreshToken.token;
                 data.id=user.attributes.sub;
        
                 // this.Getphone();
@@ -89,7 +121,12 @@ class LoginScreen extends Component<NavigationScreenProps> {
                 this.setState({loading : false});
 
                 this.setState({ user })
-                AsyncStorage.setItem('IsLogin',user.signInUserSession.idToken.jwtToken);
+                AsyncStorage.setItem('refreshToken',user.signInUserSession.refreshToken.token);
+                AsyncStorage.setItem('id',user.attributes.sub);
+
+                // const value = await AsyncStorage.getItem('refreshToken');
+                // const id:any = await AsyncStorage.getItem('id');
+                //     console.log(value,id)
                 this.props.navigation.navigate('Home');
 
             })

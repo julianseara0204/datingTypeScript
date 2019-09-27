@@ -52,14 +52,7 @@ class QuestionScreen extends Component<ComponentProps, ComponentState> {
                 <TouchableOpacity style={styles.crossContainer} activeOpacity={0.8}>
                     <Image style={styles.cross} source={cross} />
                 </TouchableOpacity>
-                <Text style={{
-                    color: 'black',
-                    alignSelf: 'center',
-                    fontWeight: 'bold',
-                    fontSize: 25
-                }}>
-                    I AM REGULAR AT
-                    </Text>
+                <Text style={{color: 'black',alignSelf: 'center',fontWeight: 'bold',fontSize: 25}}> I AM REGULAR AT</Text>
                 <Text style={{
                     color: 'grey',
                     alignSelf: 'center',

@@ -15,7 +15,7 @@ import axios from "axios";
 const BACKEND_URL = 'http://ec2-3-90-122-176.compute-1.amazonaws.com:8004';
 
 // import Auth from '@aws-amplify/auth';
-import amplify,{Auth} from 'aws-amplify';
+import amplify, { Auth } from 'aws-amplify';
 
 import awsconfig from '../../../aws-exports';
 Auth.configure(awsconfig);
@@ -23,7 +23,7 @@ Auth.configure(awsconfig);
 type CompenentState = {
     name: string,
     number: string,
-    email : string,
+    email: string,
     password: string,
     loading: boolean,
     showAlert: boolean
@@ -31,12 +31,12 @@ type CompenentState = {
 
 class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
 
-    constructor(props: any){
+    constructor(props: any) {
         super(props);
         this.state = {
             name: '',
             number: '',
-            email : '',
+            email: '',
             password: '',
             loading: false,
             showAlert: false
@@ -78,32 +78,32 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
         console.log("usernnn ", name, number, password);
 
         if (this.state.password == '' || this.state.name == '' || this.state.number == '') {
-            Alert.alert("","Fields can't be empty");
+            Alert.alert("", "Fields can't be empty");
             this.setState({
                 loading: false
             })
             return this.showAlert();
 
         } else if (!this.state.password) {
-            Alert.alert("","Please Enter Password");
+            Alert.alert("", "Please Enter Password");
             // this.state.dialogTitle = "ERROR"
             this.setState({
                 loading: false
             })
             return this.showAlert();
         } else if (!this.state.number) {
-            Alert.alert("","Please Enter Number");
+            Alert.alert("", "Please Enter Number");
             this.setState({
                 loading: false
             })
         } else if (!this.state.name) {
-            Alert.alert("","Please Enter Name");
+            Alert.alert("", "Please Enter Name");
             this.setState({
                 loading: false
             })
         }
         else if (this.state.password.length < 8) {
-            Alert.alert("","Minimum Password length must be 8 characters");
+            Alert.alert("", "Minimum Password length must be 8 characters");
             // this.state.dialogTitle = "ERROR"
             this.setState({
                 loading: false
@@ -119,19 +119,19 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
 
             // rename variable to conform with Amplify Auth field phone attribute
             Auth.signUp({
-                "username": number.trim() ,
+                "username": number.trim(),
                 "password": password.trim(),
-                attributes: { "email": email.trim(), "phone_number": number.trim(),"name":name.trim()}
+                attributes: { "email": email.trim(), "phone_number": number.trim(), "name": name.trim() }
 
-            })            
+            })
                 .then((user) => {
                     this.setState({ loading: false })
 
                     console.log('sign up successful! ', user)
                     // Alert.alert(user)
-                    datapost.profile[5].value=this.state.name
+                    // datapost.profile[5].value=this.state.name
                     // data.NAME=this.state.name
-                    this.props.navigation.navigate("OtpScreen", { data: number.trim(),password:password.trim() })
+                    this.props.navigation.navigate("OtpScreen", { data: number.trim(), password: password.trim(), name: this.state.name })
 
                 })
                 .catch(err => {
@@ -150,16 +150,16 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
 
 
 
-    
+
     addFbUser = (data: any) => {
         console.log("Url >>>>> ", BACKEND_URL + "/api/User/facebookLogin");
 
         axios.post(BACKEND_URL + "/api/User/facebookLogin", {
-                facebookAccessToken: data.accessToken,
-                facebookApplicationId: data.applicationID,
-                facebookUserId: data.userID,
-                facebookLogin: true
-            })
+            facebookAccessToken: data.accessToken,
+            facebookApplicationId: data.applicationID,
+            facebookUserId: data.userID,
+            facebookLogin: true
+        })
             .then(response => {
                 if (response.status == 201) {
                     AsyncStorage.setItem("@facebookdata:", JSON.stringify(response));
@@ -175,13 +175,38 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
     };
 
 
+    // getAWSCredentials(response: any) {
+    //     const { accessToken, expiresIn } = response;
+    //     const date = new Date();
+    //     const expires_at = expiresIn * 1000 + date.getTime();
+    //     if (!accessToken) {
+    //         return;
+    //     }
+
+    //     const fb = window.FB;
+    //     fb.api('/me', { fields: 'name,email' }, response => {
+    //         const user = {
+    //             name: response.name,
+    //             email: response.email
+    //         };
+
+    //         Auth.federatedSignIn('facebook', { token: accessToken, expires_at }, user)
+    //             .then(credentials => {
+    //                 console.log(credentials);
+    //             });
+    //     });
+    // }
 
 
-    
+
     loginWithFacebook = () => {
+        // if (Platform.OS === "android") {
+        //     LoginManager.setLoginBehavior("web_only")
+        // }
         LoginManager.logInWithReadPermissions([
             "public_profile",
             "email",
+            "name",
             //Regarding login by facebook, we should request needed persmissions
             // "user_birthday",
             // "user_location",
@@ -193,24 +218,47 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
             // //"user_education_history",
             // "user_events"
         ]).then((result: any) => {
-                console.log("result", result);
+            console.log("result", result);
 
-                // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-                //     IdentityPoolId: 'IDENTITY_POOL_ID',
-                //     Logins: {
-                //       'graph.facebook.com': result.authResponse.accessToken
-                //     }
-                //   });
+            // AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+            //     IdentityPoolId: 'IDENTITY_POOL_ID',
+            //     Logins: {
+            //       'graph.facebook.com': result.authResponse.accessToken
+            //     }
+            //   });
 
-                if (result.isCancelled) {
-                    // alert("Login cancelled");
-                } else {
-                    AccessToken.getCurrentAccessToken().then((data: any) => {
-                        console.log("data", data);
-                        this.addFbUser(data);
-                    });
-                }
-            },
+
+
+            const { accessToken, expirationTime } = result;
+            const date = new Date();
+            const expires_at = expirationTime * 1000 + date.getTime();
+
+            // const user = {
+            //     name: result.name,
+            //     email: result.email
+            // };
+            // Auth.federatedSignIn('facebook', { token: accessToken, expires_at }, user)
+            // .then(credentials => {
+            //     console.log(credentials);
+            // });
+            const user = {
+                name: "HANZALA",
+                email: "hanzala@gmail.com"
+            };
+            Auth.federatedSignIn('facebook', { token: accessToken, expires_at }, { name: 'Hanzala'})
+            .then(credentials => {
+                console.log(credentials);
+            });
+
+            if (result.isCancelled) {
+                // alert("Login cancelled");
+            } else {
+                AccessToken.getCurrentAccessToken().then((data: any) => {
+                    console.log("data", data);
+                    this.addFbUser(data);
+                });
+            }
+        },
             (error: any) => {
                 console.log("Error", error);
 
@@ -254,7 +302,7 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
                         <TextInput
                             placeholder={'Your Display Name'}
                             placeholderTextColor={'#000'}
-                            onChangeText={(text) => { this.setState({name: text})}}
+                            onChangeText={(text) => { this.setState({ name: text }) }}
                             style={styles.text} />
 
                         {/* <Text style={styles.label}>{'Email Address'}</Text> */}
@@ -264,23 +312,23 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
                             placeholder={'Add Mobile Number'}
                             keyboardType={'phone-pad'}
                             placeholderTextColor={'#000'}
-                            onChangeText={(text) => { this.setState({number: text}) }}
+                            onChangeText={(text) => { this.setState({ number: text }) }}
                         >{}</TextInput>
 
                         <Text style={styles.label}>{'Email'}</Text>
                         <TextInput style={styles.text}
                             placeholder={'Add Email'}
                             placeholderTextColor={'#000'}
-                            onChangeText={(text) => { this.setState({email: text}) }}
+                            onChangeText={(text) => { this.setState({ email: text }) }}
                         >{}</TextInput>
- 
+
                         <Text style={styles.label}>{'Password'}</Text>
                         <TextInput
                             style={styles.text}
                             placeholder={'Enter Password'}
                             placeholderTextColor={'#000'}
                             secureTextEntry={true}
-                            onChangeText={(text) => { this.setState({password: text}) }}
+                            onChangeText={(text) => { this.setState({ password: text }) }}
 
                         ></TextInput>
 
@@ -305,7 +353,7 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
                         </View>
 
 
-                         {/* <TouchableOpacity>
+                        {/* <TouchableOpacity>
 
                             <ImageBackground source={require('../../../assets/loginwithfb.png')}
                                 style={styles.facebookStyleButton}
@@ -316,14 +364,14 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
                         </TouchableOpacity> */}
 
                         <TouchableOpacity
-                        onPress={() => {
-                            this.loginWithFacebook();
-                        }}>
-                        <ImageBackground source={require('../../../assets/loginwithfb.png')}
-                                         style={styles.facebookStyleButton}>
-                            <Text
-                                style={styles.buttonText}>{'Login with Facebook'}</Text>
-                        </ImageBackground>
+                            onPress={() => {
+                                this.loginWithFacebook();
+                            }}>
+                            <ImageBackground source={require('../../../assets/loginwithfb.png')}
+                                style={styles.facebookStyleButton}>
+                                <Text
+                                    style={styles.buttonText}>{'Login with Facebook'}</Text>
+                            </ImageBackground>
                         </TouchableOpacity>
 
                     </View>

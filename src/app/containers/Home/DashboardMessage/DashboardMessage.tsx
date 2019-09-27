@@ -128,9 +128,10 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                 console.log("dialogs")
                 console.log(dialogs)
 
-                var dialog: any = []
 
                 dialogs.items.forEach((item: any) => {
+                    
+                var dialog: any = this.state.dialogs;
                     var eachdialog = {
                         dialogid: item._id,
                         lastmsg: item.last_message,
@@ -142,9 +143,9 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                     }
                     dialog.push(eachdialog);
 
+                this.setState({ dialogs: dialog });
                 })
 
-                this.setState({ dialogs: dialog });
                 console.log(this.state.dialogs);
 
             } else {
@@ -211,6 +212,7 @@ export class DashboardMessage extends Component<NavigationScreenProps, Component
                     });
 
 
+                    this.setState({ dialogs: dialog });
 
                 })
 

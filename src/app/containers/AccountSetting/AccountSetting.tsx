@@ -52,7 +52,7 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
     constructor(props: any) {
         super(props);
         this.state = {
-            phone: "0986543456",
+            phone: "",
             pushNotification: false,
             memberShip: "Trial",
             instagram: false,
@@ -202,14 +202,14 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 placeholderTextColor={'#000'}
                                 style={styles.text} />
                         </View>
-                        <Text style={styles.label}>{'CONNECTED ACCOUNTS'}</Text>
+                        {/* <Text style={styles.label}>{'CONNECTED ACCOUNTS'}</Text> */}
                         {/* TODO: Do pop that will link the accont */}
-                        <View style={styles.itemContainer}>
+                        {/* <View style={styles.itemContainer}>
                             <Input
                                 placeholder={'Facebook'}
                                 placeholderTextColor={'#000'}
                                 style={styles.text} />
-                            {/* <ToggleSwitch
+                            <ToggleSwitch
                                 // isOn={this.state.facebook}
                                 onColor='rgb(95, 199, 108)'
                                 offColor='rgba(228, 228, 228, 0.7)'
@@ -217,14 +217,14 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 // labelStyle={{ color: 'black', fontWeight: '900' }}
                                 size='small'
                                 // onToggle={this.handleOnToggle("facebook")}
-                            /> */}
+                            />
                         </View>
                         <View style={styles.itemContainer}>
                             <Input
                                 placeholder={'Instagram'}
                                 placeholderTextColor={'#000'}
                                 style={styles.text}></Input>
-                            {/* <ToggleSwitch
+                            <ToggleSwitch
                                 isOn={this.state.instagram}
                                 onColor='rgb(95, 199, 108)'
                                 offColor='rgba(228, 228, 228, 0.7)'
@@ -232,8 +232,8 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                                 // labelStyle={{ color: 'black', fontWeight: '900' }}
                                 size='small'
                                 onToggle={this.handleOnToggle("instagram")}
-                            /> */}
-                        </View>
+                            />
+                        </View> */}
                         {/* TODO: Links to sections */}
                         <Text style={styles.label}>{strings.legal}</Text>
                         <View style={[styles.itemContainer, styles.itemContainerAditional]}>
@@ -282,7 +282,11 @@ export class AccountSetting extends Component<NavigationScreenProps, CompenentSt
                             <Image source={arrow} style={styles.iconImg} />
                         </View>
                     </View>
-
+                    <TouchableOpacity style={[styles.shadowBoxItemBtn, { backgroundColor: 'white', width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}
+                    onPress={() => { this.props.navigation.navigate("OBTabScreen"); }}
+                    >
+                        <Text style={styles.logOut}>{"EDIT ACCOUNT"}</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity style={[styles.shadowBoxItemBtn, { backgroundColor: 'white', width: width - 40, alignSelf: 'center', justifyContent: 'center' }]} activeOpacity={0.8}
                     onPress={() => { this.logout() }}
                     >

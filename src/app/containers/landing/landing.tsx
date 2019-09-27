@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, Platform, StatusBar, AsyncStorage, ToastAndroid} from "react-native";
+import { Dimensions, Image, ImageBackground, Text, TouchableOpacity, View, Platform, StatusBar, AsyncStorage, ToastAndroid } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import styles from "./styles";
 import colors from '../../../Colors'
@@ -12,7 +12,8 @@ const BACKEND_URL = 'http://ec2-3-90-122-176.compute-1.amazonaws.com:8004';
 
 import { data, datapost } from '../onboarding/data';
 
-import Auth from '@aws-amplify/auth';
+import Amplify, { Auth, Hub } from 'aws-amplify';
+// import Auth from '@aws-amplify/auth';
 
 import awsconfig from '../../../aws-exports';
 Auth.configure(awsconfig);
@@ -50,7 +51,7 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
             error: null,
             username: '',
             password: '',
-            isLoading:false
+            isLoading: false
         };
     }
 
@@ -59,11 +60,11 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
         console.log("Url >>>>> ", BACKEND_URL + "/api/User/facebookLogin");
 
         axios.post(BACKEND_URL + "/api/User/facebookLogin", {
-                facebookAccessToken: data.accessToken,
-                facebookApplicationId: data.applicationID,
-                facebookUserId: data.userID,
-                facebookLogin: true
-            })
+            facebookAccessToken: data.accessToken,
+            facebookApplicationId: data.applicationID,
+            facebookUserId: data.userID,
+            facebookLogin: true
+        })
             .then(response => {
                 if (response.status == 201) {
                     AsyncStorage.setItem("@facebookdata:", JSON.stringify(response));
@@ -79,11 +80,11 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
     };
 
 
-    
+
     loginWithFacebook = () => {
         LoginManager.logInWithReadPermissions([
             "public_profile",
-            "email"
+            "email",
             //Regarding login by facebook, we should request needed persmissions
             // "user_birthday",
             // "user_location",
@@ -95,104 +96,127 @@ export class Landing extends Component<NavigationScreenProps, CompenentState> {
             // //"user_education_history",
             // "user_events"
         ]).then((result: any) => {
-                console.log("result", result);
+            console.log("result", result);
 
-                if (result.isCancelled) {
-                    // alert("Login cancelled");
-                } else {
-                    AccessToken.getCurrentAccessToken().then((data: any) => {
-                        console.log("data", data);
 
-                        this.addFbUser(data);
-                    });
-                }
+            if (result.isCancelled) {
+                // alert("Login cancelled");
+            } else {
+                AccessToken.getCurrentAccessToken().then((data: any) => {
+                    console.log("data", data);
+                    const expires = data.expirationTime;
+                    const token = data.accessToken;
+
+                    const { accessToken, expirationTime } = data;
+                    const date = new Date();
+                    const expires_at = expires * 1000 + date.getTime();
+
+
+        Auth.federatedSignIn('facebook', data, { name: 'Hanzala khan' })
+            .then(credentials => {
+                console.log('get aws credentials', credentials);
+            }).catch(e => {
+                console.log(e);
+            });
+
+        // Auth.federatedSignIn('facebook', { token: accessToken, expires_at }, user)
+        // .then(credentials => {
+        //     console.log(credentials);
+        // }).catch((err)=>{
+
+        //     console.log(err);
+        // });
+
+        // this.addFbUser(data);
+    });
+}
             },
-            (error: any) => {
-                console.log("Error", error);
+(error: any) => {
+    console.log("Error", error);
 
-                // alert("Login fail with error: " + error);
-            }
+    // alert("Login fail with error: " + error);
+}
         );
     }
 
-   
-
-    render() {
-
-        const barWidth = Dimensions.get('screen').width - 150;
 
 
-        return (
-            <View style={styles.container}>
-                <View style={{
-                    width: width,
-                    ...Platform.select({
-                        ios: {
-                            height: 20,
-                        },
-                        android: {
-                            height: 0,
-                        },
-                    }),
-                }}>
-                    <StatusBar/>
-                </View>
-                <Image source={require('../../../assets/logo.png')} style={styles.logoImage} />
-                <Text style={styles.topLogoContiner}>{'Event Dating'}</Text>
- 
-                {/* <ProgressBarAnimated
+render() {
+
+    const barWidth = Dimensions.get('screen').width - 150;
+
+
+    return (
+        <View style={styles.container}>
+            <View style={{
+                width: width,
+                ...Platform.select({
+                    ios: {
+                        height: 20,
+                    },
+                    android: {
+                        height: 0,
+                    },
+                }),
+            }}>
+                <StatusBar />
+            </View>
+            <Image source={require('../../../assets/logo.png')} style={styles.logoImage} />
+            <Text style={styles.topLogoContiner}>{'Event Dating'}</Text>
+
+            {/* <ProgressBarAnimated
                     {...styles.progressCustomStyles}
                     width={barWidth}
                     value={this.state.progress}
                     backgroundColorOnComplete={colors.periwinkleBlue}
                 /> */}
 
-                <View style={styles.boottmView}>
+            <View style={styles.boottmView}>
 
 
 
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => { this.props.navigation.navigate("LoginScreen") }}
-                        style={styles.phoneContainer}>
-                        <Text style={styles.phoneStyle}>{'Login with Phone Number'}</Text>
-                        <View style={styles.layer9} />
-                    </TouchableOpacity> 
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => { this.props.navigation.navigate("LoginScreen") }}
+                    style={styles.phoneContainer}>
+                    <Text style={styles.phoneStyle}>{'Login with Phone Number'}</Text>
+                    <View style={styles.layer9} />
+                </TouchableOpacity>
 
 
- 
 
 
-                    <TouchableOpacity
-                        onPress={() => {
-                            this.loginWithFacebook();
-                        }}>
-                        <ImageBackground source={require('../../../assets/loginwithfb.png')}
-                                         style={styles.facebookStyleButton}>
-                            <Text
-                                style={styles.buttonText}>{'Login with Facebook'}</Text>
-                        </ImageBackground>
-                    </TouchableOpacity>
- 
 
-                    <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => { this.props.navigation.navigate("RegisterScreen") }}
-                        style={styles.phoneContainer}>
-                        <Text style={styles.phoneStyle}>{'Register Here'}</Text>
-                        <View style={styles.layer9} />
-                    </TouchableOpacity>
-                    {/* <Text
+                <TouchableOpacity
+                    onPress={() => {
+                        this.loginWithFacebook();
+                    }}>
+                    <ImageBackground source={require('../../../assets/loginwithfb.png')}
+                        style={styles.facebookStyleButton}>
+                        <Text
+                            style={styles.buttonText}>{'Login with Facebook'}</Text>
+                    </ImageBackground>
+                </TouchableOpacity>
+
+
+                <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={() => { this.props.navigation.navigate("RegisterScreen") }}
+                    style={styles.phoneContainer}>
+                    <Text style={styles.phoneStyle}>{'Register Here'}</Text>
+                    <View style={styles.layer9} />
+                </TouchableOpacity>
+                {/* <Text
                         style={styles.infoText}>{'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s,'}</Text> */}
-
-                </View>
-
 
             </View>
 
 
-        );
-    }
+        </View>
+
+
+    );
+}
 }
 
 export default Landing;

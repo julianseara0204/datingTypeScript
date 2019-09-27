@@ -8,7 +8,7 @@
     EDUCATION_LEVEL:"", 
     RELIGIOUS_BELIEFS:"",
     POLITICS:"", 
-    NAME:"Anas", 
+    NAME:"", 
     GENDER:"", 
     AGE:"", 
     HEIGHT:"",
@@ -21,7 +21,9 @@
     latitude: 0.123545,
     longitude:0.23165,
     id:"7a85852b-f136-499e-843a-bd727ead06c7",
-    Token:"eyJraWQiOiIzV1gxZXpNS251RTBvZVY4cFcyVnJPaGN4clYrdlNYMkNuNStlSjZFaGRZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI3YTg1ODUyYi1mMTM2LTQ5OWUtODQzYS1iZDcyN2VhZDA2YzciLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX1VRSUZNS1gzZSIsInBob25lX251bWJlcl92ZXJpZmllZCI6dHJ1ZSwiY29nbml0bzp1c2VybmFtZSI6IjdhODU4NTJiLWYxMzYtNDk5ZS04NDNhLWJkNzI3ZWFkMDZjNyIsImF1ZCI6IjRybmliZzhqajhyZ2ZzZ2R2Yzk5aGYxMGJpIiwiZXZlbnRfaWQiOiI1MjU1YmYyNC03ZDJmLTRlYTItOWUzOC1hMmIyZmI5N2M0NGQiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTU2NjU3NDcyMSwibmFtZSI6IkFuYXMiLCJwaG9uZV9udW1iZXIiOiIrOTIzNDUyOTQyMTMwIiwiZXhwIjoxNTY2NTc4MzIxLCJpYXQiOjE1NjY1NzQ3MjEsImVtYWlsIjoiQW5hc0BnbWFpbC5jb20ifQ.EJqBdjZbb55uqd43WC7cmms34zbIXeQsjqVuLi1iDwevBu6Qr4b6eXtnNtci-w5PnudlbOm3p6wFXka1WBZ1EIWIpUlWYEJ3HiFa1qMsmp1MSzdivOj7AbdRUGsFuYioPyWMLaxHOFeI4wZgk7NIRELf27OErAj5khUvPqn3Vkf4FMVtYtMcyWxVvwSxvrveX2fUSe6Gr7iXEUtHzNB3-IqvczV9AaqgIO96xdYOjIluoyeBzYPnw6lshM8RmD5GOHMGdPFhNe3kJQyJEul6aIpZwi7RcX9XSTlqGA23Ts6dBDgAiHyOq1Mxabwzx6J5XA_RdXRCywvp4UA7fnVCVg",
+    Token:"eyJraWQiOiIzV1gxZXpNS251RTBvZVY4cFcyVnJPaGN4clYrdlNYMkNuNStlSjZFaGRZPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI1ZmFlNzE2MS1lZDViLTQ2YmEtYTI4MC00ZGMzODg5NDcyNjciLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX1VRSUZNS1gzZSIsInBob25lX251bWJlcl92ZXJpZmllZCI6dHJ1ZSwiY29nbml0bzp1c2VybmFtZSI6IjVmYWU3MTYxLWVkNWItNDZiYS1hMjgwLTRkYzM4ODk0NzI2NyIsImF1ZCI6IjRybmliZzhqajhyZ2ZzZ2R2Yzk5aGYxMGJpIiwiZXZlbnRfaWQiOiIyMzg4MTRhZi0xNzcyLTQyMzYtYjJkYS02NjJmMTU3ZGY5MTkiLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTU2OTUzODc4NywibmFtZSI6IkhhbnphbGEiLCJwaG9uZV9udW1iZXIiOiIrOTIzMDEyMjk0NjYwIiwiZXhwIjoxNTY5NTQyMzg3LCJpYXQiOjE1Njk1Mzg3ODcsImVtYWlsIjoiSGFuemFsYUBnbWFpbC5jb20ifQ.JjMYhL02sX_kN5SUy-nAbjtKx1q5n9XxL1qFHppmw2ZCL7RbqmpJX5iN-r-6l4hvX5AM5oqVQg0Vtr_rWe0OZdjW86qCDHB05NCBDGrlDlI51WPRBFVMvAMFDeUXCESggzoV07jZDjbnybnSNJJVcDBte6slqD13dZkPYe9T3h-3zyCBedm7dYbkIlH4CoERYDgOyZDgb7_CCZndi_rBhDuHUE417AHbxHAoFmGJ2QFdTgjgp-iWsm4Dz5oRL24E5MQWn8wGedTF2oS_NL_vxeis7tXpE_gPOiaCKdHFH-FvsSrx3qTXFUXhez2WPI5yOM4UArSvdEBWw2s_H_i-iA",
+    RefreshToken:"",
+    username:""
 };
 
 const datapost={
@@ -52,14 +54,24 @@ const datapost={
         "value": data.EDUCATION_LEVEL
       },
       {
+        "entryType": "WORK",
+        "privacy": "PUBLIC",
+        "value": data.WORK
+      },
+      {
+        "entryType": "JOB_TITLE",
+        "privacy": "PUBLIC",
+        "value": data.JOB_TITLE
+      },
+      {
         "entryType": "NAME",
         "privacy": "PUBLIC",
         "value": data.NAME
-      } 
+      },
     ],
     "location": {
-      "latitude": 0.123545,
-      "longitude": 0.213454
+      "latitude":data.longitude,
+      "longitude": data.longitude
     }
   }
 export {data,datapost};

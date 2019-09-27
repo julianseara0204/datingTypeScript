@@ -5,6 +5,8 @@ import { Container, Content } from "native-base"
 import styles from "./styles";
 import _ from "lodash";
 
+import { Auth } from 'aws-amplify';
+
 import { data, datapost } from '../../onboarding/data';
 import axios from "axios";
 
@@ -15,6 +17,9 @@ import { forEach } from "../../../../../types/lodash";
 import { object, number, string } from "prop-types";
 const { width } = Dimensions.get('window');
 
+const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+
+const CognitoUser = require('amazon-cognito-identity-js').CognitoUser;
 // Images
 const clock = require('../../../../assets/clock.png');
 const birthCake = require('../../../../assets/birthdayCakePiece.png');
@@ -110,12 +115,13 @@ type CompoentState = {
     tabbarMenu: tabbarMenuItem[],
     ALLtabbarMenu: any,
     personalInfo: personalInfoItem[],
+    personalInfoAll: any,
     userDescription: string,
     listActivities: ActivityItem[],
     responsedata: arr[],
     itemarr: ActivityItem[],
     intersetvalue: interset,
-    Location:string
+    Location: string
 }
 
 
@@ -131,9 +137,10 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
     constructor(props: any) {
         super(props);
         this.state = {
-            name: "Hanzala",
-            Location:"",
+            name: "",
+            Location: "",
             Allname: {},
+            personalInfoAll: {},
             picture: photo,
             itemarr: [],
             responsedata: [
@@ -169,66 +176,164 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
             ALLtabbarMenu: {},
             personalInfo: [
-                {
-                    name: "work",
-                    description: "Information Security @ Tech Mahindra",
-                    image: portfolio
-                },
-                {
-                    name: "study",
-                    description: "The Ontario College of Art and Design University",
-                    image: education
-                },
-                {
-                    name: "home",
-                    description: "Pennsylvania",
-                    image: houseOutline
-                }
+                // {
+                //     name: "work",
+                //     description: "Information Security @ Tech Mahindra",
+                //     image: portfolio
+                // },
+                // {
+                //     name: "study",
+                //     description: "The Ontario College of Art and Design University",
+                //     image: education
+                // },
+                // {
+                //     name: "home",
+                //     description: "Pennsylvania",
+                //     image: houseOutline
+                // }
             ],
             userDescription: "AFTER WORK, YOU CAN FIND ME",
             listActivities: [
             ]
         };
 
+        // console.log("data refresh token", data.RefreshToken)
+        var token = new AmazonCognitoIdentity.CognitoRefreshToken({ RefreshToken: data.RefreshToken })
+        // console.log("AmazonCognitoIdentity",AmazonCognitoIdentity);
+        // CognitoUser.refreshSession(token, (err: any, session: any) => { if (err != "") { console.log("err", err) } else { console.log("session", session) } });
+
         this.dataput();
     }
 
-    getuserimage = (id: string, type: string) => {
-
-
-        const routedup = this.state.routes;
-
-        axios({
-            method: 'GET',
-            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
-            headers: {
-                'Authorization': data.Token
-            }
-        })
-            .then((response) => {
-                // console.log(response);
-                if (response.data.length > 0) {
-                    console.log(id);
-                    console.log(response.data[response.data.length-1].fileUrl);
-                    this.state.routes.push({ id: id, Picture: response.data[response.data.length-1].fileUrl })
-                    this.setState({ picture: response.data[response.data.length-1].fileUrl })
-                }
-                else {
-                    if (type == "USER_ACCOUNT") {
-                        this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
-                    }
-                    else if (type == "EVENTS") {
-                        this.state.routes.push({ id: id, Picture: '../../../../assets/back.png' })
-                    }
-                }
-
-                // this.setState({ routes: routedup });
-            })
-            .catch((error) => {
-                console.log(error);
+    async getrefresh() {
+        try {
+            const cognitoUser = await Auth.currentAuthenticatedUser();
+            const currentSession: any = await Auth.currentSession();
+            console.log('currentSession.refreshToken', currentSession.refreshToken);
+            cognitoUser.refreshSession(currentSession.refreshToken, (err: any, session: any) => {
+                console.log('session', session);
+                const { idToken, refreshToken, accessToken } = session;
+                // do whatever you want to do now :)
             });
+        } catch (e) {
+            console.log('Unable to refresh Token', e);
+        }
+    }
+
+    // getuserimage = (id: string, type: string) => {
 
 
+    //     const routedup = this.state.routes;
+    //     axios({
+    //         method: 'GET',
+    //         url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+    //         headers: {
+    //             'Authorization': data.Token
+    //         }
+    //     })
+    //         .then((response) => {
+    //             // console.log(response);
+    //             if (response.data.length > 0) {
+    //                 console.log(id);
+    //                 console.log(response.data[response.data.length - 1].fileUrl);
+    //                 this.state.routes.push({ id: id, Picture: response.data[response.data.length - 1].fileUrl })
+    //                 this.setState({ picture: response.data[response.data.length - 1].fileUrl })
+    //             }
+    //             else {
+    //                 if (type == "USER_ACCOUNT") {
+    //                     this.state.routes.push({ id: id, Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
+    //                 }
+    //                 else if (type == "EVENTS") {
+    //                     this.state.routes.push({ id: id, Picture: '../../../../assets/back.png' })
+    //                 }
+    //             }
+
+    //             // this.setState({ routes: routedup });
+    //         })
+    //         .catch((error) => {
+    //             console.log(error);
+    //         });
+
+    // }
+
+
+    getuserimage = (id: string, type: string) => {
+        return new Promise((resolve) => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            })
+                .then((response) => {
+                    // console.log(response);
+                    if (response.data.length > 0) {
+                        console.log(id);
+                        const pic = (response.data[response.data.length - 1].fileUrl != "") ? response.data[response.data.length - 1].fileUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRpFu3UHKhhUoMmO1VLXCha-fh3n39tC7KyNoCYUPtGKDzdKakc';
+                        resolve(pic);
+                    }
+                    else {
+                        resolve('https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRpFu3UHKhhUoMmO1VLXCha-fh3n39tC7KyNoCYUPtGKDzdKakc');
+                        // if (type == "USER_ACCOUNT") {
+                        //     resolve('https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png');
+                        // }
+                        // else if (type == "ACTIVITY") {
+                        //     resolve('../../../../assets/back.png');
+                        // }
+                    }
+
+                    // this.setState({ routes: routedup });
+                })
+                .catch((error) => {
+                    resolve('../../../../assets/back.png');
+                    console.log(error);
+                });
+
+        });
+
+    }
+
+    getlocationname(latitude: any, longitude: any) {
+        return new Promise((resolve) => {
+
+            const data = { Country: "", City: "", Area: "" };
+            if (latitude > 0 || longitude > 0) {
+                fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + latitude + ',' + longitude + '&key=AIzaSyB9JlyicFsDI-vQFHdWCEKTvj42LAQ92UU')
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        // console.log(responseJson.results[0]);
+                        try {
+                            if (responseJson.results[0].hasOwnProperty("address_components")) {
+                                if (responseJson.results[0].address_components.length > 0) {
+                                    // resolve({ "Country": responseJson.results[0].address_components[7].long_name, City: responseJson.results[0].address_components[5].short_name, Area: responseJson.results[0].address_components[3].long_name })
+                                    responseJson.results[0].address_components.forEach((item: any) => {
+                                        switch (item.types[0]) {
+                                            case "country":
+                                                data.Country = item.long_name;
+                                                break;
+                                            case "administrative_area_level_2":
+                                                data.City = item.long_name;
+                                                break;
+                                            default:
+                                        }
+                                        resolve(data);
+                                    })
+                                }
+                                else {
+                                    
+                                }
+                            }
+                        }
+                        catch (ex) {
+                            resolve(data);
+                        }
+                    })
+            }
+            else {
+                resolve("");
+            }
+        });
 
     }
 
@@ -241,13 +346,14 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 'Authorization': data.Token
             }
         })
-            .then((response) => {
+            .then(async (response) => {
 
                 this.setState({ responsedata: response.data.profileEntries })
 
 
-                const alltabbarMenuDup:any = {}
+                const alltabbarMenuDup: any = {}
                 const alname: any = {}
+                const personalinfodup: any = {};
                 var indexno: number = -1;
 
                 for (var index in response.data) {
@@ -256,6 +362,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                     var no: number = 200;
 
                     const tabbarMenuDup = [];
+                    const info: any = [];
 
                     tabbarMenuDup.push({
                         id: 100,
@@ -268,10 +375,21 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                             img: scale_icon,
                         })
 
-                    this.getuserimage(response.data[index].userAccount, "USER_ACCOUNT");
+                    const routedup = this.state.routes;
+                    const pic: any = await this.getuserimage(response.data[index].userAccount, "USER_ACCOUNT")
+                    this.state.routes.push({ id: response.data[index].userAccount, Picture: pic })
+                    // this.setState({ picture: pic })
+                    this.setState({ routes: routedup });
 
-                    alname[response.data[index].userAccount] = {Name:"",Location:"TORONTO"}
-
+                    console.log(response.data[index].location[0], response.data[index].location[1]);
+                    const locationdata: any = await this.getlocationname(response.data[index].location[1], response.data[index].location[0]);
+                    console.log("locationdata", locationdata);
+                    alname[response.data[index].userAccount] = { Name: "", Location: locationdata.Country }
+                    info.push({
+                        name: "home",
+                        description: locationdata.City,
+                        image: houseOutline
+                    });
                     response.data[index].profileEntries.forEach((item: arr) => {
 
                         switch (item.entryType) {
@@ -315,24 +433,36 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                                 break;
 
                             case "JOB_TITLE":
+                                info.push({
+                                    name: "study",
+                                    description: item.value,
+                                    image: education
+                                });
                                 break;
 
 
                             case "NAME":
                                 alname[response.data[index].userAccount]['Name'] = item.value;
-                                
+
                                 break;
 
                             case "WORK":
+                                info.push({
+                                    name: "work",
+                                    description: item.value,
+                                    image: portfolio
+                                });
                                 break;
                         }
                     })
-
+                    personalinfodup[response.data[index].userAccount] = info;
                     if (index.toString() == '0') {
                         this.setState({ name: alname[response.data[index].userAccount]['Name'] });
                         this.setState({ Location: alname[response.data[index].userAccount]['Location'] });
+                        console.log("locationdata", alname);
+                        this.setState({personalInfo:info})
                     }
-                    alltabbarMenuDup[response.data[index].userAccount]=tabbarMenuDup;
+                    alltabbarMenuDup[response.data[index].userAccount] = tabbarMenuDup;
                     // alltabbarMenuDup.push(tabbarMenuDup);
                     if (index == '0') {
                         this.setState({ tabbarMenu: tabbarMenuDup });
@@ -340,12 +470,13 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 }
 
 
-                console.log(this.state.routes);
+                // console.log(this.state.routes);
                 this.setState({ Allname: alname });
+                this.setState({ personalInfoAll: personalinfodup });
                 this.setState({ ALLtabbarMenu: alltabbarMenuDup });
-                console.log(this.state.Allname);
+                console.log(this.state.personalInfoAll);
                 console.log(response);
-                
+
 
             })
             .catch((error) => {
@@ -365,59 +496,39 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
         })
             .then((response) => {
 
+                response.data.forEach(async (arrss: any) => {
 
-                response.data.forEach((arrss: event) => {
+                    const ar = this.state.listActivities;
+
+                    var pic = await this.getuserimage(arrss._id, "ACTIVITY");
 
 
-                    var pic = "";
-                    axios({
-                        method: 'GET',
-                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=EVENT&entity=" + arrss._id + "",
-                        headers: {
-                            'Authorization': data.Token
-                        }
-                    })
-                        .then((imgresponse) => {
-                            console.log(imgresponse)
-                            if (imgresponse.data.length > 0) {
-                                console.log(imgresponse.data[0].fileUrl);
-                                pic = imgresponse.data[0].fileUrl;
+                    this.setState({ picture: back })
+                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["1"], arrss.location['0']) : "";
 
-                            }
-                            else {
-                                pic = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSo469VtmD8F7-XVn2i6boJrdfdWIogcMwv1XWs-8cIFy6qAFDa";
-                            }
+                    const eachevent = {
+                        id: arrss._id,
+                        title: arrss.eventName,
+                        location: (arrss.hasOwnProperty("location")) ? location.Country : '',
+                        inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
+                        beginHour: format(arrss._eventStartTime, 'hh: mm'),
+                        image: pic,
+                    }
 
-                            this.setState({ picture: back })
+                    // this.state.itemarr.push(eachevent);     
+                    ar.push(eachevent);
 
-                            const eachevent = {
-                                id: arrss._id,
-                                title: arrss.eventName,
-                                location: "Circuit of Americas",
-                                inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
-                                beginHour: "7.30 AM",
-                                image: pic,
-                            }
+                    this.setState({ listActivities: ar });
 
-                            // this.state.itemarr.push(eachevent);     
-                            this.state.listActivities.push(eachevent);
-
-                            // this.setState({ routes: routedup });
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
                 });
 
-                const ar = this.state.listActivities;
-                this.setState({ listActivities: ar });
 
                 console.log(response);
+                console.log(this.state.listActivities);
             })
             .catch((error) => {
                 console.log(error);
             });
-
     }
 
 
@@ -444,7 +555,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             });
     }
 
-    getuserinterest=(id:any)=>{
+    getuserinterest = (id: any) => {
         axios({
             method: 'GET',
             url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
@@ -464,17 +575,18 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             .catch((error) => {
                 console.log(error);
             });
-    
+
     }
 
     useriddd = (id: string) => {
         Alert.alert(id)
     }
 
-    onPressShowCurrentIndex = (index: number) => {        
+    onPressShowCurrentIndex = (index: number) => {
         this.setState({ tabbarMenu: this.state.ALLtabbarMenu[this._carousel.current.props.data[index].id] })
         this.setState({ name: this.state.Allname[this._carousel.current.props.data[index].id]['Name'] });
         this.setState({ Location: this.state.Allname[this._carousel.current.props.data[index].id]['Location'] });
+        this.setState({ personalInfo: this.state.personalInfoAll[this._carousel.current.props.data[index].id] });
     }
 
 
@@ -593,8 +705,8 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
 
                 {this.state.listActivities.map((item, index) =>
-                    <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
-{/* 
+                    <View key={index} style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
+                        {/* 
                         <View style={{ flexDirection: 'column', padding: 10, width: width }}>
                             <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
                             <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
@@ -619,13 +731,13 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
                             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.inPeriod}</Text>
+                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 }]}>{item.inPeriod}</Text>
                             </View>
                         </View>
 
                         <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
                             <View style={styles.posImgContainer}>
-                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{uri:item.image}} />
+                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{ uri: item.image }} />
                                 <View style={{
                                     flexDirection: 'row',
                                     alignItems: 'center',
@@ -651,7 +763,7 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                                 <Image source={like} style={styles.iconImg} />
                             </TouchableOpacity>
                             <TouchableOpacity activeOpacity={0.8}
-                            onPress={()=>{this.props.navigation.navigate('InviteToActivity',{id:item.id,Name:item.title})}}
+                                onPress={() => { this.props.navigation.navigate('InviteToActivity', { id: item.id, Name: item.title }) }}
                                 style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
                                 <Image source={send} style={styles.iconImg} />
                             </TouchableOpacity>

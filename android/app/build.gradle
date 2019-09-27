@@ -77,7 +77,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
-
+// AlzaSyBn52Rb2pXulySsOBDErk9r2B_Fm82LCv
 /**
  * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
@@ -141,6 +141,16 @@ android {
 }
 
 dependencies {
+  
+  
+ implementation(project(':react-native-maps')){
+      exclude group: 'com.google.android.gms'
+  }
+  implementation 'com.google.android.gms:play-services-base:12.0.1'
+  implementation 'com.google.android.gms:play-services-basement:12.0.1'
+  implementation 'com.google.android.gms:play-services-location:12.0.1'
+  implementation 'com.google.android.gms:play-services-tasks:12.0.1'
+  implementation 'com.google.android.gms:play-services-maps:12.0.1'
     implementation project(':react-native-image-picker')
     implementation project(':react-native-aws-cognito-js')
     implementation project(':amazon-cognito-identity-js')
@@ -150,6 +160,7 @@ dependencies {
     implementation project(':react-native-localization')
     implementation project(':react-native-gesture-handler')
     implementation project(':react-native-fs')
+    implementation project(':react-native-maps')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules

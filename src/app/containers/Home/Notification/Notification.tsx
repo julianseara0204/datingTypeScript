@@ -172,8 +172,9 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
         })
             .then((response) => {
                 console.log("notification", response);
-                const alldata: any = [];
                 response.data.forEach(async (item: any) => {
+                    
+                const alldata: any = this.state.eventdata;
                     var parse = JSON.parse(item.data);
                     console.log("parse notification", parse);
 
@@ -190,9 +191,9 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                         type: item.notificationType
                     });
 
+                    this.setState({ eventdata: alldata });
                 })
 
-                this.setState({ eventdata: alldata });
 
                 console.log("eventdata", this.state.eventdata);
             })
@@ -217,7 +218,7 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
             })
                 .then((response) => {
                     var name = "";
-                    console.log("User Picure", response);
+                    // console.log("User Picure", response);
                     response.data.profileEntries.forEach((arrss: any) => {
                         if (arrss.entryType === "NAME") {
                             name = arrss.value;
@@ -262,17 +263,15 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
     }
 
     async msg(id: string) {
-        var dialog = await this.createchat(id);
+        var dialog: any = await this.createchat(id);
         var name = await this.getname(id);
         if (dialog != '') {
-            this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: item.opponentId, type: 2, name: name })
+            this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: id, type: 2, name: name })
         }
     }
 
-
-
-    createchat(id: string){
-
+    chkchat = (id: string) => {
+        return new Promise<any>(resolve => {
             axios({
                 method: 'GET',
                 url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat",
@@ -282,18 +281,58 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                 headers: {
                     'Authorization': data.Token
                 }
-            }).then(async(response) => {
-                var dialog = response.data.connectyCubeId;
-                var name = await this.getname(id);
-                var opid=response.data.userAccounts[0].cognitoId == data.id ? response.data.userAccounts[1].connectyCubeId : response.data.userAccounts[0].connectyCubeId;
-                if (dialog != '') {
-                    this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+            }).then(async (response) => {
+                console.log(response);
+                if (response.data.length == 1) {
+                    
+                    var dialog = response.data[0].connectyCubeId;
+                    var name = await this.getname(id);
+                    var opid = response.data[0].userAccounts[0].cognitoId == data.id ? response.data[0].userAccounts[1].connectyCubeId : response.data[0].userAccounts[0].connectyCubeId;
+                    console.log(dialog,opid);
+                    if (dialog != '') {
+                        console.log("INN");
+                        this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+                    }
+                    resolve(response.data);
+                }
+                else
+                {
+                    resolve(response.data);
                 }
             })
                 .catch((error) => {
 
                 });
         });
+    }
+
+
+    async createchat(id: string) {
+        const chatget: any = await this.chkchat(id);
+        
+        if (chatget.length == 0) {
+        axios({
+            method: 'POST',
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat",
+            data: {
+                "otherAccount": id
+            },
+            headers: {
+                'Authorization': data.Token
+            }
+        }).then(async (response) => {
+            console.log(response);
+            var dialog = response.data.connectyCubeId;
+            var name = await this.getname(id);
+            var opid = response.data.userAccounts[0].cognitoId == data.id ? response.data.userAccounts[1].connectyCubeId : response.data.userAccounts[0].connectyCubeId;
+            if (dialog != '') {
+                this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+            }
+        })
+            .catch((error) => {
+
+            });
+        }
     }
 
 
@@ -369,15 +408,6 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
     render() {
         return (
             <Content>
-                <View style={{ flexDirection: 'row', width: width, padding: 20, justifyContent: 'space-between' }}>
-                    <Text style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}>DM</Text>
-                    <TouchableOpacity activeOpacity={0.8}
-                        onPress={() => { }}>
-                        <Image source={search} style={{ width: 30, height: 30, resizeMode: 'contain' }} />
-                    </TouchableOpacity>
-                </View>
-
-
                 {this.state.eventdata.map((item: any, index: any) => (item.type == "ACTIVITY_INVITE") ?
                     <View style={styles.itemContainer} key={index} >
                         <View style={styles.itemSubContainer}>
@@ -418,7 +448,7 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
                                         }}>{'Profile'}</Text>
                                     </TouchableOpacity>
                                     <TouchableOpacity
-                                        onPress={() => { }}
+                                        onPress={() => { this.createchat(item.user_id); }}
                                         style={[styles.shadowBox, { alignItems: 'center', width: width / 5, borderRadius: 5, backgroundColor: 'rgb(158, 149, 254)' }]} activeOpacity={0.8}>
                                         <Text style={{
                                             color: '#000',

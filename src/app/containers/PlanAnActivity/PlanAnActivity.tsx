@@ -7,7 +7,7 @@ import styles from "./styles";
 import _ from "lodash";
 import DateTimePicker from 'react-native-modal-datetime-picker';
 import { format } from 'date-fns';
-
+const {GooglePlacesAutocomplete} = require('react-native-google-places-autocomplete');
 import ImagePicker from 'react-native-image-picker';
 
 import { data, datapost } from '../onboarding/data';
@@ -22,6 +22,72 @@ const addPhoto = require('../../../assets/AddPhoto.png');
 const place = require('../../../assets/place.png');
 const appointment = require('../../../assets/appointment.png');
 const photo = require('../../../assets/photo.png');
+const location={latitude:"",longitude:""}
+
+const homePlace = { description: 'Home', geometry: { location: { lat: 48.8152937, lng: 2.4597668 } } };
+const workPlace = { description: 'Work', geometry: { location: { lat: 48.8496818, lng: 2.2940881 } } };
+
+const GooglePlacesInput = () => {
+    return (
+        <GooglePlacesAutocomplete
+        placeholder='Search'
+        minLength={3} // minimum length of text to search
+        border={0}
+        margin={0}
+        autoFocus={false}
+        returnKeyType={'search'} // Can be left out for default return key https://facebook.github.io/react-native/docs/textinput.html#returnkeytype
+        listViewDisplayed='auto'    // true/false/undefined
+        fetchDetails={true}
+          renderDescription={(row:any) => row.description} // custom description render
+          onPress={(data:any, details:any = null) => { // 'details' is provided when fetchDetails = true
+          location.latitude=details.geometry.location.lng;
+          location.longitude=details.geometry.location.lat;
+            console.log(location, details);
+          }}
+          getDefaultValue={() => ''}
+        query={{
+            // available options: https://developers.google.com/places/web-service/autocomplete
+            key: 'AIzaSyB9JlyicFsDI-vQFHdWCEKTvj42LAQ92UU',
+            language: 'en', // language of the results
+            types: '(cities)' // default: 'geocode'
+        }}
+
+        // styles={styles.itemContainer}
+        styles={{
+            description: {
+                flex: 1,
+        width: width,
+        backgroundColor: '#ffffff'
+            },
+            predefinedPlacesDescription: {
+                flex: 1,
+                width: width,
+                backgroundColor: '#ffffff'
+            },
+          }}
+
+    //   currentLocation={true} // Will add a 'Current location' button at the top of the predefined places list
+    //   currentLocationLabel="Current location"
+      nearbyPlacesAPI='GooglePlacesSearch' // Which API to use: GoogleReverseGeocoding or GooglePlacesSearch
+      GoogleReverseGeocodingQuery={{
+        // available options for GoogleReverseGeocoding API : https://developers.google.com/maps/documentation/geocoding/intro
+      }}
+      GooglePlacesSearchQuery={{
+        // available options for GooglePlacesSearch API : https://developers.google.com/places/web-service/search
+        rankby: 'distance',
+        types: 'food'
+      }}
+
+    //   filterReverseGeocodingByTypes={['locality', 'administrative_area_level_3']} // filter the reverse geocoding results by types - ['locality', 'administrative_area_level_3'] if you want to display only cities
+    //   predefinedPlaces={[homePlace, workPlace]}
+
+    //   debounce={200} // debounce the requests in ms. Set to 0 to remove debounce. By default 0ms.
+    //   renderLeftButton={()  => <Image source={require('path/custom/left-icon')} />}
+    //   renderRightButton={() => <Text>Custom text after the input</Text>}
+    />
+    );
+}
+
 
 const { width } = Dimensions.get('window');
 
@@ -50,8 +116,8 @@ type ComponentState = {
     filereqdata: filereq,
     avatarSource: picget,
     Picdata: picdata
-    imguri:string,
-    imgname:string,
+    imguri: string,
+    imgname: string,
 }
 
 type filereq = {
@@ -87,11 +153,12 @@ interface Ivalue {
 
 
 
-
 export class PlanAnActivity extends Component<NavigationScreenProps, ComponentState> {
     static navigationOptions = {
         header: null
     };
+
+
 
     constructor(props: any) {
         super(props);
@@ -103,8 +170,8 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             isDateTimePickerVisible: false,
             selectedInput: 'startDate',
             selectDateTime: 'date',
-            imguri:"",
-            imgname:"",
+            imguri: "",
+            imgname: "",
             avatarSource: { uri: "https://unpkg.com/react-native-image-crop-picker@0.21.1/svg.svg" },
             Picdata: {
                 data: "string",
@@ -144,9 +211,17 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             ],
             Name: 'Car Racing Competition',
         };
+        console.log(GooglePlacesAutocomplete);
+
+
 
 
     }
+
+
+
+
+
 
 
 
@@ -160,11 +235,8 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 "eventEndTime": this.state.endDate + "T" + this.state.endTime,
                 "eventName": this.state.Name,
                 "eventStartTime": this.state.startDate + "T" + this.state.startTime,
-                "location": {
-                    "latitude": 12.24560,
-                    "longitude": 15.65460
-                },
-                "eventType": "EVENT_BRITE",
+                "location": location,
+                "eventType": "ACTIVITY",
             },
             headers: {
                 'Authorization': data.Token
@@ -172,13 +244,17 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
         })
             .then((response) => {
                 console.log(response);
-                this.setState({filereqdata:{
-                    "entityType": "ACTIVITY",
-                    "name": response.data._id+".jpg",
-                    "type": "image/jpeg",
-                    "entity": response.data._id
-                }});
+                this.setState({
+                    filereqdata: {
+                        "entityType": "ACTIVITY",
+                        "name": response.data._id + ".jpg",
+                        "type": "image/jpeg",
+                        "entity": response.data._id
+                    }
+                });
+                console.log(this.state.filereqdata)
                 this.putbtn();
+                this.props.navigation.pop();
             })
             .catch((error) => {
                 console.log(error);
@@ -204,26 +280,26 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                     uri: this.state.imguri,
                     type: 'image/jpeg',
                     name: this.state.imgname,
-                  };
-                  
-                  const xhr = new XMLHttpRequest();
-                  var body = new FormData();
-                  body.append('file', file);
-                  xhr.open('PUT', response1.data.fileUploadUrl);
-                  xhr.onreadystatechange = () => {
-                    if(xhr.readyState === 4){
-                      if(xhr.status === 200){
-                        console.log('Posted!');
-                      }
-                      else{
-                        console.log('Could not upload file.');
-                     }
-                   }
                 };
 
-                  xhr.setRequestHeader('Content-Type', 'image/jpeg')
+                const xhr = new XMLHttpRequest();
+                var body = new FormData();
+                body.append('file', file);
+                xhr.open('PUT', response1.data.fileUploadUrl);
+                xhr.onreadystatechange = () => {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            console.log('Posted!');
+                        }
+                        else {
+                            console.log('Could not upload file.');
+                        }
+                    }
+                };
 
-                  xhr.send(file);
+                xhr.setRequestHeader('Content-Type', 'image/jpeg')
+
+                xhr.send(file);
 
 
             })
@@ -232,7 +308,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             });
     }
 
-    
+
     selectPhotoTapped = () => {
         const options = {
             quality: 1.0,
@@ -254,11 +330,16 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 console.log('User tapped custom button: ', response.customButton);
             } else {
                 const source = { uri: response.uri };
-   
+                var file = {
+                    uri: response.uri,
+                    type: 'image/jpeg',
+                    name: response.fileName,
+                };
 
-                this.setState({imguri : response.uri});
 
-             
+                this.setState({ imguri: response.uri });
+
+
 
                 this.setState({ avatarSource: source });
             }
@@ -361,6 +442,15 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
     render() {
         return (
             <Container style={styles.container}>
+
+                
+
+                        {/* gogole search map button */}
+
+                       
+                      
+
+                        {/* end */}
                 <View style={{
                     width: width,
                     ...Platform.select({
@@ -383,8 +473,9 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                     </TouchableOpacity>
                 </View>
                 <Content>
-                    <View style={styles.items}>
 
+                    
+                    <View style={styles.items}>
                         <Text style={styles.label}>{'WHAT DO YOU WANT TO DO?'}</Text>
                         <View style={styles.itemContainer}>
                             <Input
@@ -396,10 +487,11 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                         </View>
                         <Text style={styles.label}>{'PLAN LOCATION OF YOUR ACTIVITY'}</Text>
                         <View style={styles.itemContainer}>
-                            <Input
+                            {/* <Input
                                 placeholder={'ADD LOCATION'}
                                 placeholderTextColor={'#000'}
-                                style={styles.text} />
+                                style={styles.text} /> */}
+                                 <GooglePlacesInput />
                             <Image source={place} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
                         </View>
                         <Text style={styles.label}>{'PLAN START DATE & TIME OF ACTIVITY'}</Text>
@@ -448,7 +540,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
                     <Text style={[styles.label, { marginLeft: 20, marginTop: 20 }]}>{'ADD PHOTO OF YOUR ACTIVITY'}</Text>
                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
-                        {_.map(Photoes, (item, index) => {
+                        {/* {_.map(Photoes, (item, index) => {
                             return (
                                 <View key={index} >
                                     <View style={[styles.photoShadowBox, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
@@ -463,11 +555,11 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                                 </View>
 
                             );
-                        })}
+                        })} */}
                         <View>
-                            <View style={[styles.photoShadowBox, { backgroundColor: '#dadada', height: width / 4, width: width / 3, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+                            <View  style={[styles.photoShadowBox, { backgroundColor: '#dadada', height: width / 2, width: width-20 , flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
                                 <Image source={this.state.avatarSource}
-                                    style={{ height: 40, width: 50, resizeMode: 'contain' }} />
+                                    style={{ height: width , width: width , resizeMode: 'cover' }} />
                                 <Text style={{ position: 'absolute', bottom: 5, fontWeight: 'bold', fontSize: 15, color: 'grey' }} onPress={this.selectPhotoTapped}>Add Photo</Text>
                             </View>
                         </View>

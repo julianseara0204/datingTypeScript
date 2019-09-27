@@ -19,7 +19,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.rnfs.RNFSPackage;
-
+import com.airbnb.android.react.maps.MapsPackage;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,6 +47,7 @@ public class MainApplication extends Application implements ReactApplication {
           new ReanimatedPackage(),
           new ReactNativeLocalizationPackage(),
           new RNGestureHandlerPackage(),
+          new MapsPackage(),
           new RNFSPackage()
       );
     }
