@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import { Dimensions, Image, ImageBackground, Text, ImageSourcePropType, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Platform } from "react-native";
+import { Dimensions, Image, ImageBackground, Text, ImageSourcePropType, TouchableOpacity, View, StatusBar, ScrollView, CheckBox, Platform, Alert } from "react-native";
 import { NavigationScreenProps } from "react-navigation";
 import { Container, Content, Icon } from "native-base"
 import styles from "./styles";
 import _ from "lodash";
+const message_footer = require("../../../assets/message_footer.png");
 const clock = require('../../../assets/clock.png');
 const birthCake = require('../../../assets/birthdayCakePiece.png');
 const scale_icon = require('../../../assets/scale.png');
@@ -88,16 +89,19 @@ const { width, height } = Dimensions.get('window');
 // ];
 
 type CompoentState = {
-    Picture:string,
-    index:number,
-    routes:any,
-    popup:boolean,
+    Picture: string,
+    index: number,
+    routes: any,
+    popup: boolean,
     tabbarMenu: tabbarMenuItem[],
-    Name:string,
-    id:string,
-    Location:string,
-    picture:string,
+    Name: string,
+    id: string,
+    Location: any,
+    picture: string,
     listActivities: ActivityItem[],
+    profileid: string,
+    personalInfo: any,
+    userpic: any
 }
 
 type tabbarMenuItem = {
@@ -124,29 +128,31 @@ type event = {
 }
 
 export type ActivityItem = {
-    id:string
+    id: string
     title: string,
     location: string,
     inPeriod: string,
     beginHour: string,
     image: any,
-    
+
 }
 
-export class InvitedProfile extends Component<NavigationScreenProps,CompoentState> {
+export class InvitedProfile extends Component<NavigationScreenProps, CompoentState> {
     static navigationOptions = {
         header: null
     };
-    
+
     constructor(props: any) {
         super(props);
         this.state = {
             index: 0,
-            Picture:"",            
+            Picture: "",
             Name: props.navigation.state.params.name,
             id: props.navigation.state.params.dialoagid,
-            Location:"ENGLAND",
-            picture:"",
+            profileid: props.navigation.state.params.id,
+            Location: "",
+            picture: "",
+            userpic: "",
             routes: [
                 { title: 'Sample 1', type: 100 },
                 { title: 'Sample 2', type: 200 },
@@ -156,74 +162,118 @@ export class InvitedProfile extends Component<NavigationScreenProps,CompoentStat
                 { title: 'Sample 6', type: 600 },
                 { title: 'Sample 7', type: 700 },
             ],
-            popup: false,            
+            popup: false,
+
             tabbarMenu: [
             ],
-            listActivities:[],
+            listActivities: [],
+            personalInfo: [
+
+            ],
         };
         this.getinfo();
     }
 
 
+    getlocationname(latitude: any, longitude: any) {
+        return new Promise((resolve) => {
+
+            if (latitude > 0 || longitude > 0) {
+                fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + latitude + ',' + longitude + '&key=AIzaSyB9JlyicFsDI-vQFHdWCEKTvj42LAQ92UU')
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        const data = { Country: "", City: "", Area: "" };
+                        if (responseJson.results.length > 0) {
+                            data.Area = responseJson.results[0].formatted_address;
+                        }
+                        if (responseJson.results[0].address_components.length > 0) {
+                            // resolve({ "Country": responseJson.results[0].address_components[7].long_name, City: responseJson.results[0].address_components[5].short_name, Area: responseJson.results[0].address_components[3].long_name })
+                            responseJson.results[0].address_components.forEach((item: any) => {
+                                switch (item.types[0]) {
+                                    case "country":
+                                        data.Country = item.long_name;
+                                        break;
+                                    case "administrative_area_level_2":
+                                        data.City = item.long_name;
+                                        break;
+                                    default:
+                                }
+                                resolve(data);
+                            })
+                        }
+                        else {
+                            resolve("");
+                        }
+                    })
+            }
+            else {
+                resolve("");
+            }
+        });
+
+    }
+
+
+
+    // image
     getuserimage = (id: string, type: string) => {
 
+        console.log(id);
+        return new Promise((resolve) => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            })
+                .then((response) => {
+                    // console.log(response);
+                    if (response.data.length > 0) {
+                        console.log(id);
+                        const pic = (response.data[response.data.length - 1].fileUrl != "") ? response.data[response.data.length - 1].fileUrl : 'https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRpFu3UHKhhUoMmO1VLXCha-fh3n39tC7KyNoCYUPtGKDzdKakc';
+                        resolve(pic);
+                    }
+                    else {
+                        resolve('https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcRpFu3UHKhhUoMmO1VLXCha-fh3n39tC7KyNoCYUPtGKDzdKakc');
+                    }
+                })
+                .catch((error) => {
+                    resolve('../../../../assets/back.png');
+                    console.log(error);
+                });
 
-        const routedup = this.state.routes;
+        });
 
+    }
+
+
+    getinfo = () => {
+        console.log("Userid", this.state.profileid)
         axios({
             method: 'GET',
-            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=" + type + "&entity=" + id + "",
+            url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/users?user=" + this.state.profileid + "",
             headers: {
                 'Authorization': data.Token
             }
         })
-            .then((response) => {
-                // console.log(response);
-                if (response.data.length > 0) {
-                    console.log(response.data[response.data.length-1].fileUrl);
-                    this.setState({ Picture: response.data[response.data.length-1].fileUrl })
-                }
-                else {
-                    if (type == "USER_ACCOUNT") {
-                        this.setState({ Picture: 'https://media.idownloadblog.com/wp-content/uploads/2016/03/Generic-profile-image-002.png' })
-                    }
-                    else if (type == "EVENTS") {
-                        this.setState({ Picture: '../../../../assets/back.png' })
-                    }
-                }
+            .then(async (response) => {
 
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+                // this.setState({ responsedata: response.data.profileEntries })
 
 
-
-    }
-
-    
-getinfo=()=>{
-    axios({
-        method: 'GET',
-        url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/filter?gender=MAN',
-        headers: {
-            'Authorization': data.Token
-        }
-    })
-        .then((response) => {
-
-            // this.setState({ responsedata: response.data.profileEntries })
-
-
-            const alltabbarMenuDup:any = {}
-            const alname: any = {}
-            var indexno: number = -1;
+                const alltabbarMenuDup: any = {}
+                const alname: any = {}
+                var indexno: number = -1;
 
                 indexno = indexno + 1;
 
                 var no: number = 200;
 
-                const tabbarMenuDup:any = [];
+                const tabbarMenuDup: any = [];
+
+                const info: any = [];
+
 
                 tabbarMenuDup.push({
                     id: 100,
@@ -236,11 +286,17 @@ getinfo=()=>{
                         img: scale_icon,
                     })
 
-                this.getuserimage(response.data[0].userAccount, "USER_ACCOUNT");
+                const pic: any = await this.getuserimage(response.data.userAccount._id, "USER_ACCOUNT");
+                const locationdata: any = await this.getlocationname(response.data.location[1], response.data.location[0]);
+                alname[response.data.userAccount] = { Name: "", Location: locationdata.Country };
+                this.setState({ Picture: pic }); this.setState({ Location: locationdata.Country });
 
-                alname[response.data[0].userAccount] = {Name:"",Location:"TORONTO"}
-
-                response.data[0].profileEntries.forEach((item: arr) => {
+                info.push({
+                    name: "home",
+                    description: locationdata.City,
+                    image: houseOutline
+                });
+                response.data.profileEntries.forEach((item: arr) => {
 
                     switch (item.entryType) {
                         case "GENDER":
@@ -282,43 +338,76 @@ getinfo=()=>{
                             });
                             break;
 
-                        case "JOB_TITLE":
+                        case "NAME":
+                            alname[response.data.userAccount]['Name'] = item.value;
+                            this.setState({ Name: item.value })
                             break;
 
-
-                        case "NAME":
-                            alname[response.data[0].userAccount]['Name'] = item.value;
-                            this.setState({Name:item.value})
+                        case "JOB_TITLE":
+                            info.push({
+                                name: "study",
+                                description: item.value,
+                                image: education
+                            });
                             break;
 
                         case "WORK":
+                            info.push({
+                                name: "work",
+                                description: item.value,
+                                image: portfolio
+                            });
                             break;
                     }
+
+                    this.setState({ personalInfo: info })
                 })
 
-                
-                alltabbarMenuDup[response.data[0].userAccount]=tabbarMenuDup;
+
+                alltabbarMenuDup[response.data.userAccount] = tabbarMenuDup;
                 // alltabbarMenuDup.push(tabbarMenuDup);
                 if ('0' == '0') {
                     this.setState({ tabbarMenu: tabbarMenuDup });
                 }
-            
 
 
-            console.log(this.state.tabbarMenu);
-            // this.setState({ ALLtabbarMenu: alltabbarMenuDup });
-            console.log(response);
 
+                console.log(this.state.tabbarMenu);
+                // this.setState({ ALLtabbarMenu: alltabbarMenuDup });
+                console.log(response);
+
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+
+
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
+            // data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
         })
-        .catch((error) => {
-            console.log(error);
-        });
+            .then(async (response) => {
 
+                console.log(response.data.userAccount._id);
+                this.setState({ id: response.data.userAccount._id })
 
+                const pic: any = await this.getuserimage(response.data.userAccount._id, "USER_ACCOUNT");
+                this.setState({ userpic: pic })
 
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
 
         // Event
 
+        // event
 
         axios({
             method: 'GET',
@@ -331,82 +420,159 @@ getinfo=()=>{
             .then((response) => {
 
 
-                response.data.forEach((arrss: event) => {
+                response.data.forEach(async (arrss: any) => {
+                    const ar = this.state.listActivities;
+                    var pic = await this.getuserimage(arrss._id, "ACTIVITY");
+                    console.log(pic);
 
+                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["0"], arrss.location["1"]) : "";
+                    console.log("location", location);
+                    const eachevent = {
+                        id: arrss._id,
+                        title: arrss.eventName,
+                        location: (arrss.hasOwnProperty("location")) ? location.Area : '',
+                        inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
+                        beginHour: format(arrss._eventStartTime, 'hh: mm'),
+                        image: pic,
+                    }
 
-                    var pic = "";
-                    axios({
-                        method: 'GET',
-                        url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/files/entities?entityType=EVENT&entity=" + arrss._id + "",
-                        headers: {
-                            'Authorization': data.Token
-                        }
-                    })
-                        .then((imgresponse) => {
-                            console.log(imgresponse)
-                            if (imgresponse.data.length > 0) {
-                                console.log(imgresponse.data[0].fileUrl);
-                                pic = imgresponse.data[0].fileUrl;
+                    // this.state.itemarr.push(eachevent);     
+                    ar.push(eachevent);
 
-                            }
-                            else {
-                                pic = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSo469VtmD8F7-XVn2i6boJrdfdWIogcMwv1XWs-8cIFy6qAFDa";
-                            }
+                    this.setState({ listActivities: ar });
 
-                            this.setState({ picture: back })
-
-                            const eachevent = {
-                                id: arrss._id,
-                                title: arrss.eventName,
-                                location: "Circuit of Americas",
-                                inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
-                                beginHour: "7.30 AM",
-                                image: pic,
-                            }
-
-                            // this.state.itemarr.push(eachevent);     
-                            this.state.listActivities.push(eachevent);
-
-                            // this.setState({ routes: routedup });
-                        })
-                        .catch((error) => {
-                            console.log(error);
-                        });
                 });
 
-                const ar = this.state.listActivities;
-                this.setState({ listActivities: ar });
+
+                console.log(response);
+                console.log(this.state.listActivities);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+
+    }
+
+
+    like = (id: string, type: string) => {
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
+            data: {
+                "interaction": "LIKED",
+                "type": "EVENT",
+                "entity": id
+            },
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then((response) => {
 
                 console.log(response);
             })
             .catch((error) => {
                 console.log(error);
             });
+    }
 
-}
 
 
-like = (id: string, type: string) => {
-    axios({
-        method: 'POST',
-        url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/userinterests',
-        data: {
-            "interaction": "LIKED",
-            "type": "EVENT",
-            "entity": id
-        },
-        headers: {
-            'Authorization': data.Token
-        }
-    })
-        .then((response) => {
+    getname(id: any) {
 
-            console.log(response);
-        })
-        .catch((error) => {
-            console.log(error);
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile/users?user=" + id + "",
+                headers: {
+                    'Authorization': data.Token
+                }
+            })
+                .then((response) => {
+                    var name = "";
+                    // console.log("User Picure", response);
+                    response.data.profileEntries.forEach((arrss: any) => {
+                        if (arrss.entryType === "NAME") {
+                            name = arrss.value;
+                        }
+                    });
+
+                    resolve(name);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    // return error;
+                    resolve(error);
+                });
         });
-}
+    }
+
+
+    chkchat = (id: string) => {
+        return new Promise<any>(resolve => {
+            axios({
+                method: 'GET',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat",
+                data: {
+                    "otherAccount": id
+                },
+                headers: {
+                    'Authorization': data.Token
+                }
+            }).then(async (response) => {
+                console.log(response);
+                if (response.data.length == 1) {
+
+                    var dialog = response.data[0].connectyCubeId;
+                    var name = await this.getname(id);
+                    var opid = response.data[0].userAccounts[0].cognitoId == data.id ? response.data[0].userAccounts[1].connectyCubeId : response.data[0].userAccounts[0].connectyCubeId;
+                    console.log(dialog, opid);
+                    if (dialog != '') {
+                        console.log("INN");
+                        this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+                    }
+                    resolve(response.data);
+                }
+                else {
+                    resolve(response.data);
+                }
+            })
+                .catch((error) => {
+
+                });
+        });
+    }
+
+
+    async createchat(id: string) {
+        const chatget: any = await this.chkchat(id);
+
+        if (chatget.length == 0) {
+            axios({
+                method: 'POST',
+                url: "https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat",
+                data: {
+                    "otherAccount": id
+                },
+                headers: {
+                    'Authorization': data.Token
+                }
+            }).then(async (response) => {
+                console.log(response);
+                var dialog = response.data.connectyCubeId;
+                var name = await this.getname(id);
+                var opid = response.data.userAccounts[0].cognitoId == data.id ? response.data.userAccounts[1].connectyCubeId : response.data.userAccounts[0].connectyCubeId;
+                if (dialog != '') {
+                    this.props.navigation.navigate('ChatBox', { dialoagid: dialog, opponentId: opid, type: 2, name: name })
+                }
+            })
+                .catch((error) => {
+
+                });
+        }
+    }
+
+
 
     _renderItem({ item, index }: { item: any, index: number }) {
         return (
@@ -454,16 +620,16 @@ like = (id: string, type: string) => {
                 <Content>
                     <View
                         style={{ flexDirection: 'row', alignSelf: 'center', justifyContent: 'flex-end', width: width - 40 }}>
-                        <Text style={[styles.name, { alignSelf: 'flex-end', fontSize: 20, marginRight: 20 }]}>Risa Kristy</Text>
+                        {/* <Text style={[styles.name, { alignSelf: 'flex-end', fontSize: 20, marginRight: 20 }]}>Risa Kristy</Text> */}
                         <Text style={[styles.desc, { alignSelf: 'flex-end', fontSize: 15 }]}>Mar. 16</Text>
                     </View>
                     <View
                         style={[styles.shadowBoxItem, { flexDirection: 'row', justifyContent: 'flex-end' }]}>
                         <Text style={[styles.desc, { width: width / 2 }]}>{this.state.Name} shown interest in your profile</Text>
-                        <Image source={photo} style={styles.subImage} />
+                        <Image source={{ uri: this.state.userpic }} style={styles.subImage} />
 
                         <View style={[styles.photoContainer, { position: 'absolute', top: -width / 10, left: 10 }]}>
-                            <Image source={{uri:this.state.Picture}} style={styles.photo} />
+                            <Image source={{ uri: this.state.Picture }} style={styles.photo} />
                         </View>
                     </View>
 
@@ -517,106 +683,103 @@ like = (id: string, type: string) => {
                             );
                         })}
                     </ScrollView>
-                    <View style={styles.descRow}>
-                        <Image source={portfolio} style={styles.smallIcon} />
-                        <Text
-                            style={styles.smallText}>{'Information Security @ Tech Mahindra'}</Text>
-                    </View>
-                    <View style={styles.descRow}>
-                        <Image source={education} style={styles.smallIcon} />
-                        <Text
-                            style={styles.smallText}>{'The Ontario College of Art and Design University'}</Text>
-                    </View>
-                    <View style={styles.descRow}>
-                        <Image source={houseOutline} style={styles.smallIcon} />
-                        <Text
-                            style={styles.smallText}>{'Pennsylvania'}</Text>
-                    </View>
+                    {this.state.personalInfo.map((item: any, index: any) =>
+                        <View key={index} style={styles.descRow} >
+                            <Image source={item.image} style={styles.smallIcon} />
+                            <Text style={[styles.smallText, { width: width - 50 }]}>{item.description}</Text>
+                        </View>
+                    )}
                     <Text style={{
                         marginTop: 10, marginLeft: 10, color: 'black',
                         fontWeight: 'bold',
                         fontSize: 15
                     }}>{'AFTER WORK, YOU CAN FIND ME'}</Text>
 
-                   
 
 
-                {/* ACTIVITY */}
+
+                    {/* ACTIVITY */}
 
 
-                {this.state.listActivities.map((item, index) =>
-                    <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
+                    {this.state.listActivities.map((item, index) =>
+                        <View style={{ flexDirection: 'column', alignItems: 'center', width: width }}>
 
-                        <View style={{ flexDirection: 'column', padding: 10, width: width }}>
-                            <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
-                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
-                                <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
-                                <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
-                                    <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
-                                </TouchableOpacity>
-                            </View>
-                        </View>
-
-                        <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
-                            <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>{item.title}</Text>
-                            <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
-                        </View>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image source={place} style={[styles.smallIcon, { tintColor: 'grey', marginRight: 5 }]} />
-                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.location}</Text>
-                            </View>
-
-
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
-                                <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.inPeriod}</Text>
-                            </View>
-                        </View>
-
-                        <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
-                            <View style={styles.posImgContainer}>
-                                <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{uri:item.image}} />
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    position: 'absolute',
-                                    top: 0, right: 0,
-                                    padding: 5,
-                                    backgroundColor: 'rgb(158, 149, 254)',
-                                    borderTopRightRadius: 5,
-                                    borderBottomLeftRadius: 5
-                                }}>
-                                    <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
-                                    <Text
-                                        style={[styles.smallText, { color: 'white' }]}>{item.beginHour}</Text>
+                            <View style={{ flexDirection: 'column', padding: 10, width: width }}>
+                                <Image source={quote} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
+                                <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+                                    <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3 }}>Painting Screens</Text>
+                                    <TouchableOpacity activeOpacity={0.8} style={styles.iconContainer}>
+                                        <Image source={heart_icon} style={{ height: 20, width: 20, resizeMode: 'contain' }} />
+                                    </TouchableOpacity>
                                 </View>
                             </View>
-                            <TouchableOpacity activeOpacity={0.8}
-                                style={[{ marginTop: -20 }, styles.iconContainer]}
-                                onPress={() => {
-                                    this.setState({ popup: true });
-                                    console.log(item.id);
-                                    this.like(item.id, "ACTIVITY");
-                                }}>
-                                <Image source={like} style={styles.iconImg} />
-                            </TouchableOpacity>
-                            <TouchableOpacity activeOpacity={0.8}
-                            onPress={()=>{this.props.navigation.navigate('InviteToActivity',{id:item.id,Name:item.title})}}
-                                style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
-                                <Image source={send} style={styles.iconImg} />
-                            </TouchableOpacity>
-                        </View>
 
-                    </View>
-                )}
-                {/* ACTIVITY END*/}
+                            <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 10 }}>
+                                <Text style={{ paddingLeft: 20, fontSize: 20, width: width / 4 * 3, fontStyle: 'italic', color: 'black' }}>{item.title}</Text>
+                                <Text style={{ fontSize: 15, fontWeight: 'bold', padding: 5 }}>ACTIVITY</Text>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, width: '100%' }}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image source={place} style={[styles.smallIcon, { tintColor: 'grey', marginRight: 5 }]} />
+                                    <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.location}</Text>
+                                </View>
+
+
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Image source={appointment} style={[styles.smallIcon, { tintColor: 'grey' }]} />
+                                    <Text style={[styles.smallText, { fontSize: 15, color: 'grey', width: width / 2 - 50 }]}>{item.inPeriod}</Text>
+                                </View>
+                            </View>
+
+                            <View style={{ width: '100%', height: (width - 10) / 344 * 150 + 50, backgroundColor: '#fff', padding: 10, paddingBottom: 50 }}>
+                                <View style={styles.posImgContainer}>
+                                    <Image style={{ height: '100%', width: '100%', resizeMode: 'cover' }} source={{ uri: item.image }} />
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        position: 'absolute',
+                                        top: 0, right: 0,
+                                        padding: 5,
+                                        backgroundColor: 'rgb(158, 149, 254)',
+                                        borderTopRightRadius: 5,
+                                        borderBottomLeftRadius: 5
+                                    }}>
+                                        <Image source={clock} style={[styles.smallIcon, { tintColor: 'white' }]} />
+                                        <Text
+                                            style={[styles.smallText, { color: 'white' }]}>{item.beginHour}</Text>
+                                    </View>
+                                </View>
+                                <TouchableOpacity activeOpacity={0.8}
+                                    style={[{ marginTop: -20 }, styles.iconContainer]}
+                                    onPress={() => {
+                                        this.setState({ popup: true });
+                                        console.log(item.id);
+                                        this.like(item.id, "ACTIVITY");
+                                    }}>
+                                    <Image source={like} style={styles.iconImg} />
+                                </TouchableOpacity>
+                                <TouchableOpacity activeOpacity={0.8}
+                                    onPress={() => { this.props.navigation.navigate('InviteToActivity', { id: item.id, Name: item.title }) }}
+                                    style={[{ marginTop: -40, alignSelf: 'flex-end' }, styles.iconContainer]}>
+                                    <Image source={send} style={styles.iconImg} />
+                                </TouchableOpacity>
+                            </View>
+
+                        </View>
+                    )}
+                    {/* ACTIVITY END*/}
 
 
                     <View style={{ height: 60, backgroundColor: 'white' }} />
                 </Content>
-                <HomeFooter navigation={this.props.navigation} />
+                <View style={styles.container2}>
+                    <TouchableOpacity activeOpacity={0.8}
+                        onPress={() => { this.createchat(this.state.profileid); }}
+                        style={[{ marginTop: -60, alignSelf: 'flex-end' }, styles.iconContainer2]}>
+                        <Image source={message_footer} style={[styles.iconImg2, { tintColor: 'white' }]} />
+                    </TouchableOpacity>
+                </View>
             </Container>
         );
     }

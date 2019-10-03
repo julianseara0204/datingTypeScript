@@ -71,7 +71,7 @@ export class Notification extends Component<NavigationScreenProps, ComponentStat
         });
 
         this.getnotification();
-        this.see();
+        // this.see();
         // this.like();
     }
 

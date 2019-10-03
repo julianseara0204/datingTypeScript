@@ -64,7 +64,9 @@ export class Activity extends Component<NavigationScreenProps, ComponentState> {
                     .then((response) => response.json())
                     .then((responseJson) => {
                         const data = { Country: "", City: "", Area: "" };
-                       
+                        if (responseJson.results.length > 0) {
+                            data.Area=responseJson.results[0].formatted_address;
+                        }
                         if (responseJson.results[0].address_components.length > 0) {
                             // resolve({ "Country": responseJson.results[0].address_components[7].long_name, City: responseJson.results[0].address_components[5].short_name, Area: responseJson.results[0].address_components[3].long_name })
                             responseJson.results[0].address_components.forEach((item: any) => {
@@ -133,7 +135,7 @@ export class Activity extends Component<NavigationScreenProps, ComponentState> {
     }
 
     dataget=()=>{
-         
+        
         // event
 
         axios({
@@ -148,18 +150,16 @@ export class Activity extends Component<NavigationScreenProps, ComponentState> {
 
 
                 response.data.forEach(async (arrss: any) => {
-
                     const ar = this.state.listActivities;
-
                     var pic = await this.getuserimage(arrss._id,"ACTIVITY");
                     console.log(pic);
 
-                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["1"], arrss.location['0']) : "";
+                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["0"], arrss.location["1"]) : "";
                     console.log("location", location);
                     const eachevent = {
                         id: arrss._id,
                         title: arrss.eventName,
-                        location: (arrss.hasOwnProperty("location")) ? location.Country : '',
+                        location: (arrss.hasOwnProperty("location")) ? location.Area : '',
                         inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
                         beginHour: format(arrss._eventStartTime, 'hh: mm'),
                         image: pic,

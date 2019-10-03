@@ -107,6 +107,22 @@ class OtpScreen extends Component<NavigationScreenProps> {
             })
     }
 
+    connectycubeaccount=()=>{
+        axios({
+            method: 'POST',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat/connectycube',           
+            headers: {
+            'Authorization': data.Token}
+        })
+        .then(function (response) {            
+            console.log("connectycubeaccount");   
+            console.log(response);          
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+    }
+
     dataput = () => {
 
         console.log(data.Token);
@@ -127,8 +143,9 @@ class OtpScreen extends Component<NavigationScreenProps> {
                 'Authorization': data.Token
             }
         })
-            .then(function (response) {
-                console.log(response);
+            .then((response)=> {
+                console.log(response);                
+                this.connectycubeaccount();
             })
             .catch(function (error) {
                 console.log(error);

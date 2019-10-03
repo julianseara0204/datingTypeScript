@@ -45,12 +45,15 @@ class InformationScreen extends Component<ComponentProps, ComponentState> {
                 response.data.profileEntries.forEach((arrss: any) => {
                     if (arrss.entryType === "NAME") {
                         this.setState({ name: arrss.value });
+                        datapost.profile[7].value = arrss.value;
                     }
                     if (arrss.entryType === "JOB_TITLE") {
                         this.setState({ job: arrss.value });
+                        datapost.profile[6].value = arrss.value;
                     }
                     if (arrss.entryType === "WORK") {
                         this.setState({ institute: arrss.value });
+                        datapost.profile[5].value = arrss.value;
                     }
                 });
                 // const name =response.data.profileEntries.filter((book:arritem) => (book.entryType === "NAME"? book.value :""));

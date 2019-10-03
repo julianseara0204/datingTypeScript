@@ -197,11 +197,6 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
             ]
         };
 
-        // console.log("data refresh token", data.RefreshToken)
-        var token = new AmazonCognitoIdentity.CognitoRefreshToken({ RefreshToken: data.RefreshToken })
-        // console.log("AmazonCognitoIdentity",AmazonCognitoIdentity);
-        // CognitoUser.refreshSession(token, (err: any, session: any) => { if (err != "") { console.log("err", err) } else { console.log("session", session) } });
-
         this.dataput();
     }
 
@@ -302,7 +297,10 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
                 fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + latitude + ',' + longitude + '&key=AIzaSyB9JlyicFsDI-vQFHdWCEKTvj42LAQ92UU')
                     .then((response) => response.json())
                     .then((responseJson) => {
-                        // console.log(responseJson.results[0]);
+                        console.log(latitude+","+longitude, responseJson);
+                        if (responseJson.results.length > 0) {
+                            data.Area=responseJson.results[0].formatted_address;
+                        }
                         try {
                             if (responseJson.results[0].hasOwnProperty("address_components")) {
                                 if (responseJson.results[0].address_components.length > 0) {
@@ -504,12 +502,12 @@ export class Dashboard extends Component<NavigationScreenProps, CompoentState> {
 
 
                     this.setState({ picture: back })
-                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["1"], arrss.location['0']) : "";
+                    const location: any = (arrss.hasOwnProperty("location")) ? await this.getlocationname(arrss.location["0"], arrss.location["1"]) : "";
 
                     const eachevent = {
                         id: arrss._id,
                         title: arrss.eventName,
-                        location: (arrss.hasOwnProperty("location")) ? location.Country : '',
+                        location: (arrss.hasOwnProperty("location")) ? location.Area : '',
                         inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
                         beginHour: format(arrss._eventStartTime, 'hh: mm'),
                         image: pic,

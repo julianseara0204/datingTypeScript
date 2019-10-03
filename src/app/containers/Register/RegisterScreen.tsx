@@ -247,7 +247,7 @@ class RegisterScreen extends Component<NavigationScreenProps, CompenentState> {
             };
             Auth.federatedSignIn('facebook', { token: accessToken, expires_at }, { name: 'Hanzala'})
             .then(credentials => {
-                console.log(credentials);
+                console.log(credentials);   
             });
 
             if (result.isCancelled) {

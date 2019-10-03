@@ -105,13 +105,14 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
     
     getlocationname(latitude: any, longitude: any) {
         return new Promise((resolve) => {
-
             if (latitude > 0 || longitude > 0) {
                 fetch('https://maps.googleapis.com/maps/api/geocode/json?address=' + latitude + ',' + longitude + '&key=AIzaSyB9JlyicFsDI-vQFHdWCEKTvj42LAQ92UU')
                     .then((response) => response.json())
                     .then((responseJson) => {
                         const data = { Country: "", City: "", Area: "" };
-                       
+                        if (responseJson.results.length > 0) {
+                            data.Area=responseJson.results[0].formatted_address;
+                        }
                         if (responseJson.results[0].address_components.length > 0) {
                             // resolve({ "Country": responseJson.results[0].address_components[7].long_name, City: responseJson.results[0].address_components[5].short_name, Area: responseJson.results[0].address_components[3].long_name })
                             responseJson.results[0].address_components.forEach((item: any) => {
@@ -140,8 +141,6 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
     }
 
     // image
-
-    
     getuserimage = (id: string, type: string) => {
         
         console.log(id);
@@ -237,7 +236,7 @@ export class MyProfile extends Component<NavigationScreenProps, ComponentState, 
                     const eachevent = {
                         id: arrss._id,
                         title: arrss.eventName,
-                        location: (arrss.hasOwnProperty("location")) ? location.Country : '',
+                        location: (arrss.hasOwnProperty("location")) ? location.Area : '',
                         inPeriod: format(arrss._eventStartTime, 'MMM, DD') + " - " + format(arrss._eventEndTime, 'MMM, DD'),
                         beginHour: format(arrss._eventStartTime, 'hh: mm'),
                         image: pic,

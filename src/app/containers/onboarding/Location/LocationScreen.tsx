@@ -7,6 +7,7 @@ import { datapost,data } from './../data'
 import { NavigationScreenProps } from "react-navigation";
 import { string } from "prop-types";
 
+import axios from "axios";
 // Images
 const map = require('../../../../assets/map.png');
 const pick = require('../../../../assets/pick_position.png');
@@ -28,7 +29,73 @@ class LocationScreen extends Component<NavigationScreenProps, ComponentProps> {
                 longitudeDelta: 0.0121,
             }
         }
+        this.dataput();
     }
+
+    
+
+    dataput = () => {
+        axios({
+            method: 'GET',
+            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/users/profile',
+            // data: datapost,
+            headers: {
+                'Authorization': data.Token
+            }
+        })
+            .then(async (response:any) => {
+
+
+                response.data.profileEntries.forEach((arrss: any) => {
+                    if (arrss.entryType === "GENDER") {
+                        datapost.profile[0].value = arrss.value;
+                    }
+                    if (arrss.entryType === "HEIGHT") {
+                        datapost.profile[1].value = arrss.value;
+                    }
+                    if (arrss.entryType === "DRINKING") {
+                        datapost.profile[2].value = arrss.value;
+                    }
+                    if (arrss.entryType === "SMOKING") {
+                        datapost.profile[3].value = arrss.value;
+                    }
+                    if (arrss.entryType === "EDUCATION_LEVEL") {
+                        datapost.profile[4].value = arrss.value;
+                    }
+                    if (arrss.entryType === "WORK") {
+                        datapost.profile[5].value = arrss.value;
+                    }
+                    if (arrss.entryType === "JOB_TITLE") {
+                        datapost.profile[6].value = arrss.value;
+                    }
+                    if (arrss.entryType === "NAME") {
+                        datapost.profile[7].value = arrss.value;
+                    }
+                });
+
+                if(response.data.location.length>0)
+                {
+                    datapost.location.latitude=response.data.location[1];
+                    datapost.location.longitude=response.data.location[0];
+                var re= {
+                    latitude: response.data.location[1],
+                    longitude: response.data.location[0],
+                    latitudeDelta: 0.015,
+                    longitudeDelta: 0.0121,
+                }
+
+                this.setState({region:re});
+                console.log(datapost);
+            }
+                // const name =response.data.profileEntries.filter((book:arritem) => (book.entryType === "NAME"? book.value :""));
+
+                console.log(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+
 
     getlocationname(latitude: any, longitude: any) {
         return new Promise((resolve) => {

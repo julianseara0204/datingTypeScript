@@ -18,6 +18,7 @@ const { width, height } = Dimensions.get('window');
 import axios from "axios";
 
 import { data ,datapost} from './../data.js'
+import { bool } from "prop-types";
 
 // Images
 const my_location = require('../../../../assets/my_location.png');
@@ -154,25 +155,21 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
         this.carouselRef.enableSnap(flag);
     }
 
-    connectycubeaccount=()=>{
-        axios({
-            method: 'POST',
-            url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/chat/connectycube',           
-            headers: {
-            'Authorization': data.Token}
-        })
-        .then(function (response) {            
-            console.log("connectycubeaccount");   
-            console.log(response);          
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-    }
+
 
     dataput=()=>{
 
-        console.log(data.Token);
+        var chk=true;
+        for(var a=0;a<datapost.profile.length;a++)
+        {
+            if(datapost.profile[a].value=="")
+            {
+                chk=false;
+            }
+        }
+
+        if(chk)
+        {
         // console.log(datapost);
         axios({
             method: 'PUT',
@@ -182,12 +179,15 @@ class OBTabScreen extends Component<NavigationScreenProps, ComponentState> {
             'Authorization': data.Token}
         })
         .then ((response)=> {
-        //    this.connectycubeaccount();
             console.log("Edit response",response);          
         })
         .catch(function (error) {
             console.log(error);
         });
+    }else
+    {
+        Alert.alert("Alert","Please Enter Complete information");
+    }
     }
 
 

@@ -118,6 +118,7 @@ type ComponentState = {
     Picdata: picdata
     imguri: string,
     imgname: string,
+    Discription:string
 }
 
 type filereq = {
@@ -170,6 +171,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             isDateTimePickerVisible: false,
             selectedInput: 'startDate',
             selectDateTime: 'date',
+            Discription:"",
             imguri: "",
             imgname: "",
             avatarSource: { uri: "https://unpkg.com/react-native-image-crop-picker@0.21.1/svg.svg" },
@@ -226,12 +228,14 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
 
     onadd = () => {
+        if(this.state.Name!=""&&this.state.Discription!=""&& this.state.endDate !="" && this.state.endTime!="" && this.state.imguri!="")
+        {
         console.log(this.state.endDate + "T" + this.state.endTime);
         axios({
             method: 'POST',
             url: 'https://8eojn1fzhj.execute-api.us-east-1.amazonaws.com/beta-1/events',
             data: {
-                "eventDescription": "none",
+                "eventDescription": this.state.Discription,
                 "eventEndTime": this.state.endDate + "T" + this.state.endTime,
                 "eventName": this.state.Name,
                 "eventStartTime": this.state.startDate + "T" + this.state.startTime,
@@ -259,6 +263,11 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
             .catch((error) => {
                 console.log(error);
             });
+        }
+        else
+        {
+            Alert.alert("Warning","Please Enter All Information");
+        }
     }
 
     putbtn = () => {
@@ -310,6 +319,8 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
 
     selectPhotoTapped = () => {
+        
+        this.setState({ imguri: "" });
         const options = {
             quality: 1.0,
             maxWidth: 500,
@@ -406,14 +417,15 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 else {
                     let startTime: any = new Date(date);
                     let endTime: any = new Date(this.state.endTime);
-                    if (endTime - startTime < 0) {
-                        Alert.alert('Error', 'Wrong Start Date!');
-                        this.hideDateTimePicker();
-                        return;
-                    }
-                    else {
-                        this.setState({ startTime: format(date, 'H:mm:ss') });
-                    }
+                    this.setState({ startTime: format(date, 'H:mm:ss') });
+                    // if (endTime - startTime < 0) {
+                    //     Alert.alert('Error', 'Wrong Start Date!');
+                    //     this.hideDateTimePicker();
+                    //     return;
+                    // }
+                    // else {
+                    //     this.setState({ startTime: format(date, 'H:mm:ss') });
+                    // }
                 }
 
                 this.hideDateTimePicker();
@@ -426,14 +438,15 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                 else {
                     let startTime: any = new Date(this.state.startDate + " " + this.state.startTime);
                     let endTime: any = new Date(date);
-                    if (endTime - startTime < 0) {
-                        Alert.alert('Error', 'Wrong End Date!');
-                        this.hideDateTimePicker();
-                        return;
-                    }
-                    else {
-                        this.setState({ endTime: format(date, 'H:mm:ss') });
-                    }
+                    this.setState({ endTime: format(date, 'H:mm:ss') });
+                    // if (endTime - startTime < 0) {
+                    //     Alert.alert('Error', 'Wrong End Date!');
+                    //     this.hideDateTimePicker();
+                    //     return;
+                    // }
+                    // else {
+                    //     this.setState({ endTime: format(date, 'H:mm:ss') });
+                    // }
                 }
                 this.hideDateTimePicker();
             }
@@ -485,6 +498,17 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                                 onChangeText={(text) => { const names = text; this.setState({ Name: names }); }}
                             />
                         </View>
+                        
+                        <Text style={styles.label}>{'About your Activity?'}</Text>
+                        <View style={styles.itemContainer}>
+                            <Input
+                                placeholder={'ADD Description of your Activity'}
+                                placeholderTextColor={'#000'}
+                                style={styles.text}
+                                onChangeText={(text) => { const desc = text; this.setState({ Discription: desc }); }}
+                            />
+                        </View>
+
                         <Text style={styles.label}>{'PLAN LOCATION OF YOUR ACTIVITY'}</Text>
                         <View style={styles.itemContainer}>
                             {/* <Input
@@ -511,9 +535,10 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
                             <Image source={appointment} style={{ width: 20, height: 20, resizeMode: 'contain' }} />
                         </View>
 
+
                     </View>
-                    <Text style={[styles.label, { marginLeft: 20 }]}>{'PLAN CATEGORY OF YOUR ACTIVITY'}</Text>
-                    <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
+                    {/* <Text style={[styles.label, { marginLeft: 20 }]}>{'PLAN CATEGORY OF YOUR ACTIVITY'}</Text> */}
+                    {/* <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
                         {_.map(this.state.categories, (item, index) => {
                             return (
                                 <View key={index} >
@@ -536,7 +561,7 @@ export class PlanAnActivity extends Component<NavigationScreenProps, ComponentSt
 
                             );
                         })}
-                    </ScrollView>
+                    </ScrollView> */}
 
                     <Text style={[styles.label, { marginLeft: 20, marginTop: 20 }]}>{'ADD PHOTO OF YOUR ACTIVITY'}</Text>
                     <ScrollView horizontal={true} showsHorizontalScrollIndicator={false}>
