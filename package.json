@@ -22,7 +22,7 @@
     "native-base": "^2.12.1",
     "node": "^12.1.0",
     "react": "16.8.3",
-    "react-native": "^0.59.9",
+    "react-native": "^0.62.3",
     "react-native-aws-cognito-js": "0.0.7",
     "react-native-confirmation-code-input": "^1.0.4",
     "react-native-dialog": "^5.6.0",
